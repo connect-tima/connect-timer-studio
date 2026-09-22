@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timer-studio-v1';
+const CACHE_NAME = 'timer-studio-v2';
 const APP_SHELL = [
     './',
     './index.html',
@@ -17,6 +17,9 @@ const APP_SHELL = [
     './icons/icon-192.png',
     './icons/icon-512.png',
 ];
+// The ffmpeg-core files are fetched from a version-pinned CDN URL (@0.12.10) and never change,
+// so they're safe to cache-first forever — that's what saves the ~30MB re-download on later exports.
+const CDN_HOSTS = ['cdn.jsdelivr.net'];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -32,23 +35,35 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Cache-first, falling back to network. Successful responses (including the cross-origin
-// ffmpeg-core.js/.wasm fetched from jsdelivr at export time) are cached as they come in, so a
-// later offline export can reuse them instead of re-downloading ~30MB.
 self.addEventListener('fetch', (event) => {
     const req = event.request;
     if (req.method !== 'GET') return;
+    const url = new URL(req.url);
 
-    event.respondWith(
-        caches.match(req).then((cached) => {
-            if (cached) return cached;
-            return fetch(req).then((res) => {
+    if (CDN_HOSTS.includes(url.hostname)) {
+        // Immutable, pinned-version CDN asset: cache-first is safe and avoids re-fetching ~30MB.
+        event.respondWith(
+            caches.match(req).then((cached) => cached || fetch(req).then((res) => {
                 if (res && res.status === 200) {
                     const copy = res.clone();
                     caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
                 }
                 return res;
-            }).catch(() => cached);
-        })
+            }))
+        );
+        return;
+    }
+
+    // The app itself: network-first, so a new deploy is picked up immediately whenever the
+    // phone/PC is online — cache-first here would silently freeze everyone on the version they
+    // first loaded. Falls back to the cached copy only when offline (or the network fetch fails).
+    event.respondWith(
+        fetch(req).then((res) => {
+            if (res && res.status === 200) {
+                const copy = res.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
+            }
+            return res;
+        }).catch(() => caches.match(req))
     );
 });
