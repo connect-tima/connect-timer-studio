@@ -645,10 +645,35 @@ window.addEventListener('keydown', e => {
 function autosaveDraft() {
     try { localStorage.setItem('timerDraft', JSON.stringify(state)); } catch (e) {}
 }
+
+// Recursively fills `target` with `source`'s values, but a key `source` doesn't have is left
+// alone. This matters whenever the saved data (a draft, a template) predates a newly added
+// state field: a plain Object.assign would silently overwrite state.ui wholesale and turn a new
+// field like `snapEnabled` into `undefined` (falsy) instead of leaving it at its default.
+function deepMergeDefaults(target, source) {
+    for (const key of Object.keys(source || {})) {
+        const sv = source[key];
+        if (sv && typeof sv === 'object' && !Array.isArray(sv) && target[key] && typeof target[key] === 'object') {
+            deepMergeDefaults(target[key], sv);
+        } else {
+            target[key] = sv;
+        }
+    }
+    return target;
+}
+
+// Replaces every section of the live `state` with `obj`'s values layered onto a fresh
+// defaultState() — so any field `obj` doesn't have (from an older save) still gets today's
+// default rather than silently keeping whatever `state` happened to hold before this call.
+function replaceState(obj) {
+    const merged = deepMergeDefaults(defaultState(), obj || {});
+    Object.assign(state, merged);
+}
+
 function loadDraft() {
     try {
         const s = JSON.parse(localStorage.getItem('timerDraft'));
-        if (s) Object.assign(state, s);
+        if (s) replaceState(s);
     } catch (e) {}
 }
 
@@ -1443,7 +1468,7 @@ document.getElementById('templateLoadBtn').addEventListener('click', () => {
     const name = document.getElementById('templateSelect').value;
     const templates = getTemplates();
     if (!name || !templates[name]) return alert("Select a saved template first.");
-    Object.assign(state, templates[name]);
+    replaceState(templates[name]);
     pushAllToControls(); renderPreview(); commit();
 });
 document.getElementById('templateDeleteBtn').addEventListener('click', () => {
