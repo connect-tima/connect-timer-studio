@@ -142,55 +142,10 @@
             <div class="card">
                 <div class="card-title">Font</div>
                 <div class="row" style="margin-bottom:10px;">
-                    <select id="clockFont">
-                        <optgroup label="Custom Font"><option value="'CustomUploadedFont', sans-serif">User Uploaded Font</option></optgroup>
-                        <optgroup label="Bold & Display">
-                            <option value="'Anton', sans-serif">Anton</option>
-                            <option value="'Alfa Slab One', cursive">Alfa Slab One</option>
-                            <option value="'Abril Fatface', cursive">Abril Fatface</option>
-                            <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
-                            <option value="'Bangers', cursive">Bangers</option>
-                            <option value="'Black Ops One', cursive">Black Ops One</option>
-                            <option value="'Righteous', cursive">Righteous</option>
-                            <option value="'Oswald', sans-serif">Oswald</option>
-                            <option value="'Montserrat', sans-serif">Montserrat</option>
-                            <option value="'Raleway', sans-serif">Raleway</option>
-                            <option value="'Merriweather', serif">Merriweather</option>
-                            <option value="'Playfair Display', serif">Playfair Display (Italic)</option>
-                            <option value="'Cinzel Decorative', serif">Cinzel Decorative</option>
-                        </optgroup>
-                        <optgroup label="Script & Handwriting">
-                            <option value="'Allura', cursive">Allura</option>
-                            <option value="'Dancing Script', cursive">Dancing Script</option>
-                            <option value="'Fredericka the Great', cursive">Fredericka the Great</option>
-                            <option value="'Great Vibes', cursive">Great Vibes</option>
-                            <option value="'Indie Flower', cursive">Indie Flower</option>
-                            <option value="'Lobster', cursive">Lobster</option>
-                            <option value="'Pacifico', cursive">Pacifico</option>
-                            <option value="'Parisienne', cursive">Parisienne</option>
-                            <option value="'Sacramento', cursive">Sacramento</option>
-                            <option value="'Satisfy', cursive">Satisfy</option>
-                            <option value="'Shadows Into Light', cursive">Shadows Into Light</option>
-                        </optgroup>
-                        <optgroup label="Tech & Monospace">
-                            <option value="'Orbitron', sans-serif">Orbitron</option>
-                            <option value="'Audiowide', cursive">Audiowide</option>
-                            <option value="'Roboto Mono', monospace">Roboto Mono</option>
-                            <option value="'VT323', monospace">Terminal (VT323)</option>
-                            <option value="'Press Start 2P', cursive">Press Start 2P</option>
-                            <option value="'Monoton', cursive">Monoton</option>
-                        </optgroup>
-                        <optgroup label="Unique & Themed">
-                            <option value="'Creepster', cursive">Creepster</option>
-                            <option value="'MedievalSharp', cursive">MedievalSharp</option>
-                            <option value="'Permanent Marker', cursive">Permanent Marker</option>
-                            <option value="'Special Elite', cursive">Special Elite</option>
-                            <option value="'UnifrakturMaguntia', cursive">UnifrakturMaguntia</option>
-                        </optgroup>
-                        <optgroup label="System"><option value="Arial">Arial</option></optgroup>
-                    </select>
+                    <select id="clockFont"></select>
                     <input type="file" id="clockFontFile" accept=".ttf,.otf,.woff,.woff2" title="Upload a custom font">
                 </div>
+                <div class="hint" style="margin-top:-4px;margin-bottom:10px;">Uploaded fonts are saved and appear as an option everywhere fonts are chosen (Clock, Label).</div>
                 <label>Color Source</label>
                 <select id="clockColorMode" style="margin-bottom:8px;">
                     <option value="solid">Solid Color</option>
@@ -311,14 +266,10 @@
                 <label>Text</label>
                 <input type="text" id="labelText" placeholder="Sermon Countdown" style="margin-bottom:8px;">
                 <label>Font</label>
-                <select id="labelFont" style="margin-bottom:8px;">
-                    <option value="'Montserrat', sans-serif">Montserrat</option>
-                    <option value="'Oswald', sans-serif">Oswald</option>
-                    <option value="'Playfair Display', serif">Playfair Display</option>
-                    <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
-                    <option value="'Roboto Mono', monospace">Roboto Mono</option>
-                    <option value="Arial">Arial</option>
-                </select>
+                <div class="row" style="margin-bottom:8px;">
+                    <select id="labelFont"></select>
+                    <input type="file" id="labelFontFile" accept=".ttf,.otf,.woff,.woff2" title="Upload a custom font">
+                </div>
                 <label>Color</label>
                 <input type="color" id="labelColor" style="margin-bottom:8px;">
                 <div class="quad">
@@ -411,10 +362,24 @@
         <div class="undo-row">
             <button class="secondary" id="undoBtn" title="Undo (Ctrl+Z)">↶ Undo</button>
             <button class="secondary" id="redoBtn" title="Redo (Ctrl+Shift+Z)">↷ Redo</button>
-            <div class="row" style="flex:1;justify-content:flex-end;">
-                <input type="checkbox" id="showGuides" style="width:auto;"><span style="font-size:0.75rem;color:#ccc;">Show Guides</span>
+            <div class="row" style="flex:1;justify-content:flex-end;gap:14px;">
+                <span class="row" style="gap:5px;"><input type="checkbox" id="snapEnabled" style="width:auto;"><span style="font-size:0.75rem;color:#ccc;">Snap</span></span>
+                <span class="row" style="gap:5px;"><input type="checkbox" id="showGuides" style="width:auto;"><span style="font-size:0.75rem;color:#ccc;">Show Guides</span></span>
             </div>
         </div>
+
+        <div class="card" style="margin-bottom:10px;">
+            <div class="card-title" style="margin-bottom:8px;">▶ Preview Timeline <span id="previewReadout" style="float:right;color:#03dac6;font-family:monospace;font-weight:normal;text-transform:none;">0.0s</span></div>
+            <input type="range" id="previewScrub" min="0" max="1000" step="1" value="0" style="width:100%;margin-bottom:8px;">
+            <div class="row" style="gap:6px;flex-wrap:wrap;">
+                <button class="secondary icon-btn" id="previewPlayBtn">▶ Play</button>
+                <button class="secondary icon-btn" data-jump="start">⏮ Start</button>
+                <button class="secondary icon-btn" data-jump="urgency">⚠ Urgency</button>
+                <button class="secondary icon-btn" data-jump="zero">⏱ 0:00</button>
+                <button class="secondary icon-btn" data-jump="end">🏁 End Msg</button>
+            </div>
+        </div>
+
         <div class="status" id="statusText">Ready</div>
         <div class="progress-outer" id="progressOuter"><div class="progress-inner" id="progressInner"></div></div>
         <div class="action-area">
@@ -458,7 +423,7 @@ function defaultState() {
             { c: '#ff00cc', s: 0 }, { c: '#3333ff', s: 50 }, { c: '#00ffcc', s: 100 }, { c: '#ffffff', s: 75 }, { c: '#000000', s: 100 }
         ] },
         output: { bgMode: 'transparent', resolution: '1920,1080', fps: 30 },
-        ui: { showGuides: false }
+        ui: { showGuides: false, snapEnabled: true }
     };
 }
 let state = defaultState();
@@ -570,6 +535,7 @@ const BINDINGS = [
     ['exportFps', s => s.output.fps, (s,v) => s.output.fps = parseInt(v), 'select'],
 
     ['showGuides', s => s.ui.showGuides, (s,v) => s.ui.showGuides = v, 'checkbox'],
+    ['snapEnabled', s => s.ui.snapEnabled, (s,v) => s.ui.snapEnabled = v, 'checkbox'],
 ];
 const BINDING_MAP = Object.fromEntries(BINDINGS.map(b => [b[0], b]));
 
@@ -939,6 +905,9 @@ const DRAGGABLE = [
     { key:'logo', color:'#66ff66', label:'Logo', active:() => state.logo.visible, get:()=>[state.logo.x,state.logo.y], set:(x,y)=>{state.logo.x=x;state.logo.y=y;} },
 ];
 
+const GUIDE_COLORS = { grid: 'rgba(255,255,255,0.35)', center: 'rgba(255,255,255,0.7)', align: 'rgba(0,255,255,0.9)', mirror: 'rgba(255,165,0,0.95)' };
+let activeSnapGuides = []; // [{axis:'x'|'y', pos, kind, note?}] — populated during a drag, cleared on drop
+
 function drawHandlesAndGuides() {
     if (suppressHandles) return;
     ctx.globalAlpha = 1.0; ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.setLineDash([]);
@@ -949,6 +918,24 @@ function drawHandlesAndGuides() {
         ctx.beginPath(); ctx.moveTo(0,canvas.height/2); ctx.lineTo(canvas.width,canvas.height/2); ctx.stroke();
         ctx.setLineDash([]);
     }
+
+    // Live snap feedback while dragging: full-span guide lines, colored by what they snapped to.
+    activeSnapGuides.forEach(g => {
+        ctx.strokeStyle = GUIDE_COLORS[g.kind] || GUIDE_COLORS.grid;
+        ctx.lineWidth = g.kind === 'grid' ? 1.5 : 2.5;
+        ctx.setLineDash(g.kind === 'grid' ? [6,6] : []);
+        ctx.beginPath();
+        if (g.axis === 'x') { const x = canvas.width*g.pos/100; ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); }
+        else { const y = canvas.height*g.pos/100; ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); }
+        ctx.stroke();
+        ctx.setLineDash([]);
+        if (g.note) {
+            ctx.fillStyle = GUIDE_COLORS[g.kind]; ctx.font = `${Math.round(Math.min(canvas.width,canvas.height)*0.02)}px Arial`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText(g.note, canvas.width/2, g.axis==='y' ? canvas.height*g.pos/100 + 6 : 6);
+        }
+    });
+
     const r = Math.min(canvas.width, canvas.height) * 0.012;
     DRAGGABLE.forEach(d => {
         if (!d.active()) return;
@@ -981,8 +968,7 @@ function render(text, progressPct, isUrgent) {
 }
 
 function renderPreview() {
-    const totalMs = (state.timer.minutes*60 + state.timer.seconds) * 1000;
-    render(getFormattedTime(totalMs, totalMs), 1.0, false);
+    renderAtElapsed(previewElapsedMs);
     updateExportEstimate();
 }
 
@@ -1014,18 +1000,65 @@ function dragStart(e) {
     });
     if (best) { dragTarget = best; canvas.style.cursor = 'grabbing'; e.preventDefault(); }
 }
+// Snaps a raw (x%,y%) to grid lines, canvas center, alignment with other active elements,
+// and "mirrored margins" (this element's gap from one edge equals another element's gap from
+// the opposite edge — i.e. confirms/creates even spacing, like the space above the clock vs.
+// below the progress bar). Returns the (possibly adjusted) position plus the guide lines to draw.
+const SNAP_THRESHOLD = 1.5; // percentage points
+const GRID_STEP = 5;
+function trySnap(target, rawX, rawY) {
+    if (!state.ui.snapEnabled) return { x: rawX, y: rawY, guides: [] };
+    const others = DRAGGABLE.filter(d => d !== target && d.active());
+    const guides = [];
+
+    // When two candidates land on the same value (e.g. a mirrored-margin position that's
+    // also a round grid number), prefer the more meaningful one — a generic grid line is
+    // the least interesting explanation for why something snapped.
+    const KIND_PRIORITY = { mirror: 0, align: 1, center: 2, grid: 3 };
+    const pickBest = (value, candidates) => {
+        const inRange = candidates
+            .map(c => ({ ...c, dist: Math.abs(value - c.pos) }))
+            .filter(c => c.dist < SNAP_THRESHOLD);
+        if (!inRange.length) return null;
+        inRange.sort((a, b) => (KIND_PRIORITY[a.kind] - KIND_PRIORITY[b.kind]) || (a.dist - b.dist));
+        return inRange[0];
+    };
+
+    const xCandidates = [{ pos: 50, kind: 'center' }];
+    for (let g = 0; g <= 100; g += GRID_STEP) xCandidates.push({ pos: g, kind: 'grid' });
+    others.forEach(o => { const [ox] = o.get(); xCandidates.push({ pos: ox, kind: 'align', note: `= ${o.label}` }); });
+    let x = rawX;
+    const xHit = pickBest(rawX, xCandidates);
+    if (xHit) { x = xHit.pos; guides.push({ axis: 'x', pos: x, kind: xHit.kind, note: xHit.note }); }
+
+    const yCandidates = [{ pos: 50, kind: 'center' }];
+    for (let g = 0; g <= 100; g += GRID_STEP) yCandidates.push({ pos: g, kind: 'grid' });
+    others.forEach(o => {
+        const [, oy] = o.get();
+        yCandidates.push({ pos: oy, kind: 'align', note: `= ${o.label}` });
+        yCandidates.push({ pos: 100 - oy, kind: 'mirror', note: `Even spacing vs. ${o.label} ✓` });
+    });
+    let y = rawY;
+    const yHit = pickBest(rawY, yCandidates);
+    if (yHit) { y = yHit.pos; guides.push({ axis: 'y', pos: y, kind: yHit.kind, note: yHit.note }); }
+
+    return { x, y, guides };
+}
+
 function dragMove(e) {
     if (!dragTarget) return;
     e.preventDefault(); // stop page scroll while actively dragging a handle
     const pos = canvasPos(e);
-    const xPct = Math.max(0, Math.min(100, pos.x/canvas.width*100));
-    const yPct = Math.max(0, Math.min(100, pos.y/canvas.height*100));
-    dragTarget.set(xPct, yPct);
+    const rawX = Math.max(0, Math.min(100, pos.x/canvas.width*100));
+    const rawY = Math.max(0, Math.min(100, pos.y/canvas.height*100));
+    const snapped = trySnap(dragTarget, rawX, rawY);
+    activeSnapGuides = snapped.guides;
+    dragTarget.set(snapped.x, snapped.y);
     pushAllToControls();
     renderPreview();
 }
 function dragEnd() {
-    if (dragTarget) { dragTarget = null; canvas.style.cursor = 'default'; commit(); }
+    if (dragTarget) { dragTarget = null; canvas.style.cursor = 'default'; activeSnapGuides = []; renderPreview(); commit(); }
 }
 canvas.addEventListener('mousedown', dragStart);
 window.addEventListener('mousemove', dragMove);
@@ -1034,6 +1067,77 @@ canvas.addEventListener('touchstart', dragStart, { passive: false });
 window.addEventListener('touchmove', dragMove, { passive: false });
 window.addEventListener('touchend', dragEnd);
 window.addEventListener('touchcancel', dragEnd);
+
+/* =========================================================================
+   PREVIEW TIMELINE — play/pause and scrub through the real timeline (start
+   hold -> countdown -> urgency -> end message) so transitions can be checked
+   without waiting for them in real time. Editing any control while scrubbed
+   away from 0 re-renders at that same point, not back at the start.
+   ========================================================================= */
+let previewElapsedMs = 0;
+let isPreviewPlaying = false;
+let previewAnimId = null;
+let previewLastTs = null;
+
+function renderAtElapsed(elapsedMs) {
+    const tl = getTimelineParams();
+    const clamped = Math.max(0, Math.min(tl.totalMs, elapsedMs));
+    previewElapsedMs = clamped;
+    const st = computeFrameState(clamped, tl);
+    render(st.text, st.progressPct, st.isUrgent);
+    const scrub = document.getElementById('previewScrub');
+    scrub.value = tl.totalMs ? Math.round((clamped/tl.totalMs)*1000) : 0;
+    let phase = 'Start Hold';
+    if (clamped >= tl.startHoldMs && clamped < tl.startHoldMs+tl.timerMs) phase = 'Counting Down';
+    else if (clamped >= tl.startHoldMs+tl.timerMs) phase = 'End Message';
+    document.getElementById('previewReadout').innerText = `${(clamped/1000).toFixed(1)}s — ${phase}`;
+}
+
+function previewStop() {
+    isPreviewPlaying = false;
+    document.getElementById('previewPlayBtn').innerText = '▶ Play';
+    if (previewAnimId) { cancelAnimationFrame(previewAnimId); previewAnimId = null; }
+}
+function previewLoop() {
+    if (!isPreviewPlaying) return;
+    const now = performance.now();
+    const dt = now - previewLastTs; previewLastTs = now;
+    const tl = getTimelineParams();
+    let next = previewElapsedMs + dt;
+    if (next >= tl.totalMs) { renderAtElapsed(tl.totalMs); previewStop(); return; }
+    renderAtElapsed(next);
+    previewAnimId = requestAnimationFrame(previewLoop);
+}
+function previewTogglePlay() {
+    if (isExporting) return;
+    if (isPreviewPlaying) { previewStop(); return; }
+    const tl = getTimelineParams();
+    if (previewElapsedMs >= tl.totalMs) previewElapsedMs = 0; // restart from the top if already at the end
+    isPreviewPlaying = true;
+    document.getElementById('previewPlayBtn').innerText = '⏸ Pause';
+    previewLastTs = performance.now();
+    previewAnimId = requestAnimationFrame(previewLoop);
+}
+function previewJump(target) {
+    previewStop();
+    const tl = getTimelineParams();
+    const points = {
+        start: 0,
+        urgency: tl.startHoldMs + Math.max(0, tl.timerMs - tl.urgencyMs),
+        zero: tl.startHoldMs + tl.timerMs,
+        end: tl.totalMs,
+    };
+    renderAtElapsed(points[target] ?? 0);
+}
+document.getElementById('previewPlayBtn').addEventListener('click', previewTogglePlay);
+document.getElementById('previewScrub').addEventListener('input', (e) => {
+    previewStop();
+    const tl = getTimelineParams();
+    renderAtElapsed((e.target.value/1000) * tl.totalMs);
+});
+document.querySelectorAll('[data-jump]').forEach(btn => {
+    btn.addEventListener('click', () => previewJump(btn.dataset.jump));
+});
 
 /* =========================================================================
    GRADIENT BUILDER EXTRA CONTROLS (direction / reverse — not simple 1:1 bindings)
@@ -1068,21 +1172,115 @@ function updateExportEstimate() {
 }
 
 /* =========================================================================
-   FONT & LOGO UPLOADS
+   FONT LIBRARY — one master list populates every font <select> (Clock, Label).
+   Custom uploaded fonts are persisted as data URLs in localStorage and merged
+   into that same list at startup, so an upload is available everywhere, in
+   every future session, not just a single "uploaded font" slot.
    ========================================================================= */
+const BUILTIN_FONT_GROUPS = [
+    { label: 'Bold & Display', options: [
+        ["'Anton', sans-serif","Anton"], ["'Alfa Slab One', cursive","Alfa Slab One"], ["'Abril Fatface', cursive","Abril Fatface"],
+        ["'Bebas Neue', sans-serif","Bebas Neue"], ["'Bangers', cursive","Bangers"], ["'Black Ops One', cursive","Black Ops One"],
+        ["'Righteous', cursive","Righteous"], ["'Oswald', sans-serif","Oswald"], ["'Montserrat', sans-serif","Montserrat"],
+        ["'Raleway', sans-serif","Raleway"], ["'Merriweather', serif","Merriweather"], ["'Playfair Display', serif","Playfair Display (Italic)"],
+        ["'Cinzel Decorative', serif","Cinzel Decorative"],
+    ]},
+    { label: 'Script & Handwriting', options: [
+        ["'Allura', cursive","Allura"], ["'Dancing Script', cursive","Dancing Script"], ["'Fredericka the Great', cursive","Fredericka the Great"],
+        ["'Great Vibes', cursive","Great Vibes"], ["'Indie Flower', cursive","Indie Flower"], ["'Lobster', cursive","Lobster"],
+        ["'Pacifico', cursive","Pacifico"], ["'Parisienne', cursive","Parisienne"], ["'Sacramento', cursive","Sacramento"],
+        ["'Satisfy', cursive","Satisfy"], ["'Shadows Into Light', cursive","Shadows Into Light"],
+    ]},
+    { label: 'Tech & Monospace', options: [
+        ["'Orbitron', sans-serif","Orbitron"], ["'Audiowide', cursive","Audiowide"], ["'Roboto Mono', monospace","Roboto Mono"],
+        ["'VT323', monospace","Terminal (VT323)"], ["'Press Start 2P', cursive","Press Start 2P"], ["'Monoton', cursive","Monoton"],
+    ]},
+    { label: 'Unique & Themed', options: [
+        ["'Creepster', cursive","Creepster"], ["'MedievalSharp', cursive","MedievalSharp"], ["'Permanent Marker', cursive","Permanent Marker"],
+        ["'Special Elite', cursive","Special Elite"], ["'UnifrakturMaguntia', cursive","UnifrakturMaguntia"],
+    ]},
+    { label: 'System', options: [["Arial","Arial"]] },
+];
+let customFonts = []; // [{name, family, dataUrl}] — persisted to localStorage
+const FONT_SELECT_IDS = ['clockFont', 'labelFont'];
+
+function renderFontSelects() {
+    const customHtml = customFonts.length
+        ? `<optgroup label="Your Uploaded Fonts">${customFonts.map(f => `<option value="'${f.family}', sans-serif">${f.name}</option>`).join('')}</optgroup>`
+        : '';
+    const builtinHtml = BUILTIN_FONT_GROUPS.map(g =>
+        `<optgroup label="${g.label}">${g.options.map(([v,l]) => `<option value="${v}">${l}</option>`).join('')}</optgroup>`
+    ).join('');
+    FONT_SELECT_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        const prev = el.value;
+        el.innerHTML = customHtml + builtinHtml;
+        if (prev && [...el.options].some(o => o.value === prev)) el.value = prev;
+    });
+}
+
+// Throws on failure — callers decide whether that's fatal (a fresh upload) or something
+// to just skip (one corrupted cached font shouldn't stop the others from loading).
+async function registerCustomFont(f) {
+    const face = new FontFace(f.family, `url(${f.dataUrl})`);
+    await face.load();
+    document.fonts.add(face);
+}
+
+async function loadCustomFontsFromStorage() {
+    try { customFonts = JSON.parse(localStorage.getItem('customFonts') || '[]'); }
+    catch (e) { customFonts = []; }
+    const results = await Promise.allSettled(customFonts.map(registerCustomFont));
+    results.forEach((r, i) => { if (r.status === 'rejected') console.error('Failed to register cached font', customFonts[i].name, r.reason); });
+    customFonts = customFonts.filter((_, i) => results[i].status === 'fulfilled');
+    renderFontSelects();
+}
+
+// Reads the file, registers it under a unique family name, adds it to the shared library
+// (persisting to localStorage), and applies it to whichever picker triggered the upload.
+async function addCustomFontFromFile(file, applyTo) {
+    const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+    const name = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'Custom Font';
+    const family = `CustomFont_${name.replace(/[^a-zA-Z0-9]/g, '')}_${Date.now().toString(36)}`;
+    await registerCustomFont({ name, family, dataUrl });
+
+    customFonts = customFonts.filter(f => f.name !== name); // re-uploading the same name replaces it
+    customFonts.push({ name, family, dataUrl });
+    renderFontSelects();
+    try { localStorage.setItem('customFonts', JSON.stringify(customFonts)); }
+    catch (e) {
+        alert(`"${name}" is loaded for this session, but too large to save permanently (browser storage limit) — you'll need to re-upload it next time.`);
+    }
+
+    const familyValue = `'${family}', sans-serif`;
+    if (applyTo === 'clock') { state.clock.font = familyValue; }
+    else { state.label.font = familyValue; }
+    pushAllToControls();
+    renderPreview(); commit();
+    return name;
+}
+
 document.getElementById('clockFontFile').addEventListener('change', async (e) => {
     const file = e.target.files[0]; if (!file) return;
-    try {
-        const url = URL.createObjectURL(file);
-        const font = new FontFace('CustomUploadedFont', `url(${url})`);
-        await font.load();
-        document.fonts.add(font);
-        state.clock.font = "'CustomUploadedFont', sans-serif";
-        document.getElementById('clockFont').value = state.clock.font;
-        renderPreview(); commit();
-        alert("Custom font '" + file.name + "' loaded!");
-    } catch (err) { console.error(err); alert("Failed to load font — must be TTF, OTF, WOFF or WOFF2."); }
+    try { const name = await addCustomFontFromFile(file, 'clock'); alert(`Custom font "${name}" added — now available for Clock and Label, in every session.`); }
+    catch (err) { console.error(err); alert("Failed to load font — must be TTF, OTF, WOFF or WOFF2."); }
+    e.target.value = '';
 });
+document.getElementById('labelFontFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    try { const name = await addCustomFontFromFile(file, 'label'); alert(`Custom font "${name}" added — now available for Clock and Label, in every session.`); }
+    catch (err) { console.error(err); alert("Failed to load font — must be TTF, OTF, WOFF or WOFF2."); }
+    e.target.value = '';
+});
+
+/* =========================================================================
+   LOGO UPLOAD
+   ========================================================================= */
 
 document.getElementById('logoFile').addEventListener('change', (e) => {
     const file = e.target.files[0]; if (!file) return;
@@ -1140,6 +1338,7 @@ function toggleExport() { isExporting ? cancelExport() : exportVideo(); }
 function cancelExport() { exportCancelled = true; statusText.innerText = "Cancelling after current frame..."; }
 
 async function exportVideo() {
+    previewStop();
     const { totalFrames, fps, tl } = updateExportEstimate();
     if (totalFrames > 4000) {
         const proceed = confirm(`This will render ${totalFrames.toLocaleString()} frames, which can take a while and a lot of memory (especially at 4K). For long timers, consider a lower frame rate (24fps) or 1080p.\n\nContinue anyway?`);
@@ -1260,7 +1459,8 @@ document.getElementById('templateDeleteBtn').addEventListener('click', () => {
 /* =========================================================================
    INIT
    ========================================================================= */
-document.fonts.ready.then(() => {
+document.fonts.ready.then(async () => {
+    await loadCustomFontsFromStorage();
     loadDraft();
     pushAllToControls();
     if (state.logo.dataUrl) {
