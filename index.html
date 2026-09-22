@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connect Timer Studio</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121212">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Allura&family=Amatic+SC:wght@700&family=Anton&family=Audiowide&family=Bangers&family=Bebas+Neue&family=Black+Ops+One&family=Cinzel+Decorative:wght@700&family=Creepster&family=Dancing+Script:wght@700&family=Fredericka+the+Great&family=Great+Vibes&family=Indie+Flower&family=Lobster&family=MedievalSharp&family=Merriweather:wght@700&family=Monoton&family=Montserrat:wght@700&family=Orbitron:wght@700&family=Oswald:wght@700&family=Pacifico&family=Parisienne&family=Permanent+Marker&family=Playfair+Display:ital,wght@1,700&family=Press+Start+2P&family=Raleway:wght@700&family=Righteous&family=Roboto+Mono:wght@700&family=Sacramento&family=Satisfy&family=Shadows+Into+Light&family=Special+Elite&family=UnifrakturMaguntia&family=VT323&display=swap" rel="stylesheet">
+<style>
+    :root { --accent:#bb86fc; --accent2:#03dac6; --bg:#121212; --panel:#1e1e1e; --panel2:#252525; --line:#3a3a3a; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: #e0e0e0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+    .container { background-color: var(--panel); padding: 1.5rem; border-radius: 16px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); max-width: 1500px; width: 100%; border: 1px solid #333; display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+    .editor-panel { flex: 1.1; min-width: 380px; text-align: left; }
+    .preview-panel { flex: 1.4; min-width: 480px; position: sticky; top: 20px; }
+
+    h1 { margin: 0 0 4px; color: var(--accent); font-family: 'Playfair Display', serif; font-size: 1.7rem; letter-spacing: 0.5px; }
+    .subtitle { font-size: 0.8rem; color: #888; margin-bottom: 16px; }
+
+    .tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 2px solid var(--line); margin-bottom: 14px; }
+    .tab-btn { padding: 8px 14px; border-radius: 8px 8px 0 0; background: #2a2a2a; border: 1px solid var(--line); border-bottom: none; cursor: pointer; font-size: 0.78rem; color: #aaa; font-weight: 600; }
+    .tab-btn.active { background: var(--panel2); color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .card { background: var(--panel2); padding: 14px; border-radius: 10px; margin-bottom: 14px; }
+    .card-title { font-size: 0.85rem; color: #ccc; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .quad { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .col { display: flex; flex-direction: column; flex: 1; min-width: 80px; align-items: center; }
+    .sval { font-size: 0.72rem; color: var(--accent2); margin-bottom: 3px; font-family: monospace; font-weight: bold; }
+
+    label { display:block; margin-bottom: 4px; font-size: 0.72rem; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+    input, select, textarea { width: 100%; padding: 7px; border-radius: 6px; border: 1px solid #444; background: #2d2d2d; color: white; font-size: 0.82rem; }
+    input:focus, select:focus { border-color: var(--accent); outline: none; }
+    input[type=color] { height: 32px; padding: 0; cursor: pointer; border: none; }
+    input[type=checkbox] { width: 16px; height: 16px; margin: 0; cursor: pointer; accent-color: var(--accent); }
+    input[type=range] { -webkit-appearance: none; background: transparent; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: var(--accent2); cursor: pointer; margin-top: -8px; }
+    input[type=range] { height: 24px; }
+    input[type=range]::-webkit-slider-runnable-track { height: 4px; background: #444; border-radius: 2px; }
+
+    button { background: linear-gradient(135deg, var(--accent), #7c4dff); color: white; border: none; padding: 9px 14px; font-size: 0.88rem; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    button.secondary { background: #333; border: 1px solid #555; }
+    button.icon-btn { padding: 7px; flex: 1; font-size: 0.78rem; }
+    button:hover { opacity: 0.9; }
+    button:disabled { background: #3a3a3a; color: #777; cursor: not-allowed; }
+    button.stop-btn { background: #cf6679; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(207,102,121,.4);} 70%{box-shadow:0 0 0 9px rgba(207,102,121,0);} 100%{box-shadow:0 0 0 0 rgba(207,102,121,0);} }
+
+    .hint { font-size: 0.7rem; color: #888; line-height: 1.4; margin-top: 6px; }
+    .canvas-wrapper { border: 2px dashed #444; border-radius: 8px; overflow: hidden; width: 100%; background-image: linear-gradient(45deg,#2a2a2a 25%,transparent 25%),linear-gradient(-45deg,#2a2a2a 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#2a2a2a 75%),linear-gradient(-45deg,transparent 75%,#2a2a2a 75%); background-size: 20px 20px; background-color: #1a1a1a; position: relative; }
+    canvas { display: block; width: 100%; height: auto; cursor: default; }
+    .undo-row { display:flex; gap:8px; margin: 8px 0; }
+    .undo-row button { flex: 0 0 auto; padding: 6px 10px; font-size: 0.85rem; }
+    .progress-outer { background:#333; border-radius:6px; height:8px; overflow:hidden; display:none; margin: 8px 0; }
+    .progress-inner { background: linear-gradient(135deg, var(--accent), var(--accent2)); height:100%; width:0%; }
+    .status { font-size: 0.85rem; color: #ccc; text-align:center; margin: 4px 0; }
+    .action-area { display:flex; gap:8px; margin-top: 8px; }
+    .color-mode-row { display:flex; gap:8px; margin-bottom:8px; }
+    .swatch-row { display:flex; gap:8px; }
+
+    @media (max-width: 950px) { .container { flex-direction: column; } .preview-panel { position: relative; top: 0; min-width: 100%; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="editor-panel">
+        <h1>Connect Timer Studio</h1>
+        <div class="subtitle">Countdown timer builder — transparent or green-screen export, ready for Premiere.</div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tab-timer">⏱ Timer</button>
+            <button class="tab-btn" data-tab="tab-clock">🔤 Clock</button>
+            <button class="tab-btn" data-tab="tab-progress">📊 Progress</button>
+            <button class="tab-btn" data-tab="tab-border">🔲 Border</button>
+            <button class="tab-btn" data-tab="tab-extras">🖼 Extras</button>
+            <button class="tab-btn" data-tab="tab-colors">🌈 Colors</button>
+            <button class="tab-btn" data-tab="tab-export">📤 Export</button>
+        </div>
+
+        <!-- TIMER TAB -->
+        <div class="tab-panel active" id="tab-timer">
+            <div class="card">
+                <div class="card-title">Duration & Format</div>
+                <div class="grid2">
+                    <div>
+                        <label>Duration</label>
+                        <div class="row">
+                            <input type="number" id="minutes" min="0"><span style="font-size:0.68em;color:#888;">Min</span>
+                            <input type="number" id="seconds" min="0" max="59"><span style="font-size:0.68em;color:#888;">Sec</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Clock Mode</label>
+                        <select id="format">
+                            <option value="dynamic">✨ Dynamic (Min→Sec→MS)</option>
+                            <option value="M:SS">Standard (5:00)</option>
+                            <option value="MM:SS">Zero Padded (05:00)</option>
+                            <option value="HH:MM:SS">Hours (00:05:00)</option>
+                            <option value="SS">Seconds Only (300)</option>
+                            <option value="SS.ms">Seconds + MS (300.00)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Hold Periods (sec)</label>
+                        <div class="row">
+                            <input type="number" id="startHold" min="0"><span style="font-size:0.68em;color:#888;">Start</span>
+                            <input type="number" id="endHold" min="0"><span style="font-size:0.68em;color:#888;">End</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Anchor Digits</label>
+                        <div class="row"><input type="checkbox" id="stabilizeDigits" style="width:auto;"><span style="font-size:0.72em;color:#ccc;">Stop jitter on narrow numbers</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">🚨 Urgency & Ending</div>
+                <label>Ending Message</label>
+                <input type="text" id="endMessage" placeholder="Time's Up!" style="margin-bottom:10px;">
+                <div class="grid2">
+                    <div>
+                        <label>Urgency Trigger (sec left)</label>
+                        <div class="row"><input type="number" id="urgencyTrigger" min="1"><input type="checkbox" id="urgencyEnabled" style="width:auto;"><span style="font-size:0.68em;">On</span></div>
+                    </div>
+                    <div>
+                        <label>Urgency Color</label>
+                        <input type="color" id="urgencyColor">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLOCK TAB -->
+        <div class="tab-panel" id="tab-clock">
+            <div class="card">
+                <div class="card-title">Font</div>
+                <div class="row" style="margin-bottom:10px;">
+                    <select id="clockFont">
+                        <optgroup label="Custom Font"><option value="'CustomUploadedFont', sans-serif">User Uploaded Font</option></optgroup>
+                        <optgroup label="Bold & Display">
+                            <option value="'Anton', sans-serif">Anton</option>
+                            <option value="'Alfa Slab One', cursive">Alfa Slab One</option>
+                            <option value="'Abril Fatface', cursive">Abril Fatface</option>
+                            <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                            <option value="'Bangers', cursive">Bangers</option>
+                            <option value="'Black Ops One', cursive">Black Ops One</option>
+                            <option value="'Righteous', cursive">Righteous</option>
+                            <option value="'Oswald', sans-serif">Oswald</option>
+                            <option value="'Montserrat', sans-serif">Montserrat</option>
+                            <option value="'Raleway', sans-serif">Raleway</option>
+                            <option value="'Merriweather', serif">Merriweather</option>
+                            <option value="'Playfair Display', serif">Playfair Display (Italic)</option>
+                            <option value="'Cinzel Decorative', serif">Cinzel Decorative</option>
+                        </optgroup>
+                        <optgroup label="Script & Handwriting">
+                            <option value="'Allura', cursive">Allura</option>
+                            <option value="'Dancing Script', cursive">Dancing Script</option>
+                            <option value="'Fredericka the Great', cursive">Fredericka the Great</option>
+                            <option value="'Great Vibes', cursive">Great Vibes</option>
+                            <option value="'Indie Flower', cursive">Indie Flower</option>
+                            <option value="'Lobster', cursive">Lobster</option>
+                            <option value="'Pacifico', cursive">Pacifico</option>
+                            <option value="'Parisienne', cursive">Parisienne</option>
+                            <option value="'Sacramento', cursive">Sacramento</option>
+                            <option value="'Satisfy', cursive">Satisfy</option>
+                            <option value="'Shadows Into Light', cursive">Shadows Into Light</option>
+                        </optgroup>
+                        <optgroup label="Tech & Monospace">
+                            <option value="'Orbitron', sans-serif">Orbitron</option>
+                            <option value="'Audiowide', cursive">Audiowide</option>
+                            <option value="'Roboto Mono', monospace">Roboto Mono</option>
+                            <option value="'VT323', monospace">Terminal (VT323)</option>
+                            <option value="'Press Start 2P', cursive">Press Start 2P</option>
+                            <option value="'Monoton', cursive">Monoton</option>
+                        </optgroup>
+                        <optgroup label="Unique & Themed">
+                            <option value="'Creepster', cursive">Creepster</option>
+                            <option value="'MedievalSharp', cursive">MedievalSharp</option>
+                            <option value="'Permanent Marker', cursive">Permanent Marker</option>
+                            <option value="'Special Elite', cursive">Special Elite</option>
+                            <option value="'UnifrakturMaguntia', cursive">UnifrakturMaguntia</option>
+                        </optgroup>
+                        <optgroup label="System"><option value="Arial">Arial</option></optgroup>
+                    </select>
+                    <input type="file" id="clockFontFile" accept=".ttf,.otf,.woff,.woff2" title="Upload a custom font">
+                </div>
+                <label>Color Source</label>
+                <select id="clockColorMode" style="margin-bottom:8px;">
+                    <option value="solid">Solid Color</option>
+                    <option value="theme">Preset Theme</option>
+                    <option value="customGrad">Custom Gradient</option>
+                </select>
+                <div id="clockSolidRow"><label>Solid Color</label><input type="color" id="clockSolidColor"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Size, Opacity & Position</div>
+                <div class="quad">
+                    <div class="col"><span class="sval" id="v_clockScale">Size</span><input type="range" id="clockScale" min="0.05" max="1.5" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_clockOpacity">Op</span><input type="range" id="clockOpacity" min="0" max="1" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_clockX">X</span><input type="range" id="clockX" min="0" max="100" step="0.5"></div>
+                    <div class="col"><span class="sval" id="v_clockY">Y</span><input type="range" id="clockY" min="0" max="100" step="0.5"></div>
+                </div>
+                <div class="hint">Tip: drag the red handle directly on the preview to reposition.</div>
+            </div>
+        </div>
+
+        <!-- PROGRESS TAB -->
+        <div class="tab-panel" id="tab-progress">
+            <div class="card">
+                <div class="card-title">Shape, Fill & Direction</div>
+                <div class="row" style="margin-bottom:8px;">
+                    <select id="progType">
+                        <option value="none">None</option>
+                        <option value="bar_horz">Horizontal Bar</option>
+                        <option value="bar_vert">Vertical Bar</option>
+                        <option value="bar_segmented">Segmented Bar</option>
+                        <option value="ring">Circular Ring</option>
+                        <option value="ring_dashed">Dashed Ring</option>
+                        <option value="ring_segmented">Segmented Ring (Dial)</option>
+                        <option value="ring_sector">Pie Chart</option>
+                        <option value="frame_square">Square Frame Chase</option>
+                    </select>
+                    <select id="progFillBehavior">
+                        <option value="deplete">Deplete (Full→Empty)</option>
+                        <option value="fill">Fill (Empty→Full)</option>
+                    </select>
+                    <select id="progDirection">
+                        <option value="left">Start / Clockwise</option>
+                        <option value="right">End / Counter-CW</option>
+                        <option value="center">Center Out</option>
+                    </select>
+                </div>
+                <div class="row" style="margin-bottom:8px;">
+                    <select id="progCap">
+                        <option value="round">Round Caps / Ends</option>
+                        <option value="butt">Flat Caps / Ends</option>
+                        <option value="square">Square Caps</option>
+                    </select>
+                    <div class="row" style="flex:1;justify-content:center;"><input type="checkbox" id="progShowTrack" style="width:auto;"><span style="font-size:0.7em;color:#ccc;">Show Track</span></div>
+                    <input type="number" id="progSegments" min="2" max="120" title="Segment/dash count">
+                </div>
+                <label>Color Source</label>
+                <select id="progColorMode" style="margin-bottom:8px;">
+                    <option value="solid">Solid Color</option>
+                    <option value="matchText">Match Clock</option>
+                    <option value="theme">Preset Theme</option>
+                    <option value="customGrad">Custom Gradient</option>
+                </select>
+                <div id="progSolidRow"><label>Solid Color</label><input type="color" id="progSolidColor"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Size, Thickness, Opacity & Angle</div>
+                <div class="quad">
+                    <div class="col"><span class="sval" id="v_progScale">Size</span><input type="range" id="progScale" min="0.1" max="2.0" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_progThickness">Thick</span><input type="range" id="progThickness" min="0.1" max="3.0" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_progOpacity">Op</span><input type="range" id="progOpacity" min="0" max="1" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_progStartAngle">Start</span><input type="range" id="progStartAngle" min="0" max="360" step="1"></div>
+                </div>
+                <label style="margin-top:8px;">Position</label>
+                <div class="quad">
+                    <div class="col"><span class="sval" id="v_progX">X</span><input type="range" id="progX" min="0" max="100" step="0.5"></div>
+                    <div class="col"><span class="sval" id="v_progY">Y</span><input type="range" id="progY" min="0" max="100" step="0.5"></div>
+                </div>
+                <div class="hint">Tip: drag the teal handle directly on the preview to reposition.</div>
+            </div>
+        </div>
+
+        <!-- BORDER TAB -->
+        <div class="tab-panel" id="tab-border">
+            <div class="card">
+                <div class="card-title">Style & Color</div>
+                <select id="borderType" style="margin-bottom:8px;">
+                    <option value="none">None</option>
+                    <option value="box">Box Frame</option>
+                    <option value="underline">Underline</option>
+                    <option value="circle">Circle</option>
+                    <option value="brackets">[ Brackets ]</option>
+                </select>
+                <label>Color Source</label>
+                <select id="borderColorMode" style="margin-bottom:8px;">
+                    <option value="solid">Solid Color</option>
+                    <option value="matchText">Match Clock</option>
+                    <option value="theme">Preset Theme</option>
+                    <option value="customGrad">Custom Gradient</option>
+                </select>
+                <div id="borderSolidRow"><label>Solid Color</label><input type="color" id="borderSolidColor"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Size, Opacity & Position</div>
+                <div class="quad">
+                    <div class="col"><span class="sval" id="v_borderScale">Size</span><input type="range" id="borderScale" min="0.1" max="3.0" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_borderOpacity">Op</span><input type="range" id="borderOpacity" min="0" max="1" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_borderX">X</span><input type="range" id="borderX" min="0" max="100" step="0.5"></div>
+                    <div class="col"><span class="sval" id="v_borderY">Y</span><input type="range" id="borderY" min="0" max="100" step="0.5"></div>
+                </div>
+                <div class="hint">Tip: drag the purple handle directly on the preview to reposition.</div>
+            </div>
+        </div>
+
+        <!-- EXTRAS TAB -->
+        <div class="tab-panel" id="tab-extras">
+            <div class="card">
+                <div class="card-title">🏷 Label Text <span style="float:right;"><input type="checkbox" id="labelVisible" style="width:auto;"> <span style="font-size:0.7em;color:#ccc;">Show</span></span></div>
+                <label>Text</label>
+                <input type="text" id="labelText" placeholder="Sermon Countdown" style="margin-bottom:8px;">
+                <label>Font</label>
+                <select id="labelFont" style="margin-bottom:8px;">
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                    <option value="'Oswald', sans-serif">Oswald</option>
+                    <option value="'Playfair Display', serif">Playfair Display</option>
+                    <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                    <option value="'Roboto Mono', monospace">Roboto Mono</option>
+                    <option value="Arial">Arial</option>
+                </select>
+                <label>Color</label>
+                <input type="color" id="labelColor" style="margin-bottom:8px;">
+                <div class="quad">
+                    <div class="col"><span class="sval" id="v_labelScale">Size</span><input type="range" id="labelScale" min="0.02" max="0.3" step="0.005"></div>
+                    <div class="col"><span class="sval" id="v_labelOpacity">Op</span><input type="range" id="labelOpacity" min="0" max="1" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_labelX">X</span><input type="range" id="labelX" min="0" max="100" step="0.5"></div>
+                    <div class="col"><span class="sval" id="v_labelY">Y</span><input type="range" id="labelY" min="0" max="100" step="0.5"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">🖼 Logo / Image <span style="float:right;"><input type="checkbox" id="logoVisible" style="width:auto;"> <span style="font-size:0.7em;color:#ccc;">Show</span></span></div>
+                <input type="file" id="logoFile" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="margin-bottom:8px;">
+                <div class="quad">
+                    <div class="col"><span class="sval" id="v_logoScale">Size</span><input type="range" id="logoScale" min="0.02" max="1.0" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_logoOpacity">Op</span><input type="range" id="logoOpacity" min="0" max="1" step="0.01"></div>
+                    <div class="col"><span class="sval" id="v_logoX">X</span><input type="range" id="logoX" min="0" max="100" step="0.5"></div>
+                    <div class="col"><span class="sval" id="v_logoY">Y</span><input type="range" id="logoY" min="0" max="100" step="0.5"></div>
+                </div>
+                <div class="hint">PNG with transparency recommended (e.g. a church logo badge).</div>
+            </div>
+        </div>
+
+        <!-- COLORS TAB (shared theme + gradient builder) -->
+        <div class="tab-panel" id="tab-colors">
+            <div class="hint" style="margin-bottom:10px;">These are shared by any element whose Color Source is set to "Preset Theme" or "Custom Gradient" (Clock / Progress / Border).</div>
+            <div class="card">
+                <div class="card-title">Preset Theme</div>
+                <select id="themeName">
+                    <option value="roseGold">Rose Gold</option><option value="gold">Luxury Gold</option><option value="silver">Silver</option>
+                    <option value="ocean">Ocean</option><option value="neon">Neon Cyberpunk</option><option value="candy">Cotton Candy</option><option value="fire">Fire</option>
+                </select>
+            </div>
+            <div class="card">
+                <div class="row" style="justify-content:space-between;margin-bottom:10px;">
+                    <div class="card-title" style="margin:0;border:none;padding:0;">Gradient Builder</div>
+                    <select id="gradCount" style="width:110px;"><option value="2">2 Colors</option><option value="3">3 Colors</option><option value="4">4 Colors</option><option value="5">5 Colors</option></select>
+                </div>
+                <div id="gradRow0" class="row" style="margin-bottom:6px;"><input type="color" id="grad_c0"><input type="range" id="grad_s0" min="0" max="100"><span class="sval" id="grad_v0" style="width:35px;">0%</span></div>
+                <div id="gradRow1" class="row" style="margin-bottom:6px;"><input type="color" id="grad_c1"><input type="range" id="grad_s1" min="0" max="100"><span class="sval" id="grad_v1" style="width:35px;">50%</span></div>
+                <div id="gradRow2" class="row" style="margin-bottom:6px;"><input type="color" id="grad_c2"><input type="range" id="grad_s2" min="0" max="100"><span class="sval" id="grad_v2" style="width:35px;">100%</span></div>
+                <div id="gradRow3" class="row" style="margin-bottom:6px;"><input type="color" id="grad_c3"><input type="range" id="grad_s3" min="0" max="100"><span class="sval" id="grad_v3" style="width:35px;">75%</span></div>
+                <div id="gradRow4" class="row" style="margin-bottom:6px;"><input type="color" id="grad_c4"><input type="range" id="grad_s4" min="0" max="100"><span class="sval" id="grad_v4" style="width:35px;">100%</span></div>
+                <div class="row" style="margin-top:8px;">
+                    <button class="secondary icon-btn" id="gradReverseBtn">🔀 Reverse</button>
+                    <button class="secondary icon-btn" data-dir="horz">➔ H</button>
+                    <button class="secondary icon-btn" data-dir="vert">⬇ V</button>
+                    <button class="secondary icon-btn" data-dir="diag">⬊ D</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPORT TAB -->
+        <div class="tab-panel" id="tab-export">
+            <div class="card">
+                <div class="card-title">Output Format</div>
+                <label>Background / Container</label>
+                <select id="bgMode" style="margin-bottom:10px;">
+                    <option value="transparent">Transparent → ProRes 4444 MOV (Alpha)</option>
+                    <option value="green">Green Screen → MP4</option>
+                    <option value="black">Black Background → MP4</option>
+                    <option value="white">White Background → MP4</option>
+                </select>
+                <div class="grid2">
+                    <div>
+                        <label>Resolution</label>
+                        <select id="resolution">
+                            <option value="1920,1080">1080p Landscape</option>
+                            <option value="3840,2160">4K Landscape</option>
+                            <option value="1080,1920">1080p Vertical</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Export Frame Rate</label>
+                        <select id="exportFps"><option value="24">24 fps</option><option value="30">30 fps</option><option value="60">60 fps</option></select>
+                    </div>
+                </div>
+                <label style="margin-top:10px;">Audio File (optional)</label>
+                <input type="file" id="audioFile" accept="audio/*">
+                <div class="hint" id="exportEstimate">Set a duration to see an export estimate.</div>
+                <div class="hint">Transparent renders straight to <strong>ProRes 4444 (.mov) with real alpha</strong> — imports directly into Premiere Pro with transparency intact, no Shutter Encoder step needed. Standard MP4/H.264 cannot store transparency at all, so the baked options render onto a solid color for green-screen keying (or "Screen" blend mode with black/white).</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREVIEW & ACTIONS -->
+    <div class="preview-panel">
+        <div class="canvas-wrapper">
+            <canvas id="timerCanvas" width="1920" height="1080"></canvas>
+        </div>
+        <div class="undo-row">
+            <button class="secondary" id="undoBtn" title="Undo (Ctrl+Z)">↶ Undo</button>
+            <button class="secondary" id="redoBtn" title="Redo (Ctrl+Shift+Z)">↷ Redo</button>
+            <div class="row" style="flex:1;justify-content:flex-end;">
+                <input type="checkbox" id="showGuides" style="width:auto;"><span style="font-size:0.75rem;color:#ccc;">Show Guides</span>
+            </div>
+        </div>
+        <div class="status" id="statusText">Ready</div>
+        <div class="progress-outer" id="progressOuter"><div class="progress-inner" id="progressInner"></div></div>
+        <div class="action-area">
+            <button id="startBtn" style="flex:1;font-size:1.2rem;padding:14px;">📤 Export Video</button>
+        </div>
+        <div class="action-area">
+            <button class="secondary" id="testAudioBtn" style="flex:1;">🔊 Test Audio</button>
+        </div>
+        <div class="action-area">
+            <select id="templateSelect" style="flex:1.5;"></select>
+            <button class="secondary" id="templateLoadBtn">▶ Load</button>
+            <button class="secondary" id="templateSaveBtn">➕ Save As</button>
+            <button class="secondary" style="background:#4a2020;" id="templateDeleteBtn">🗑</button>
+        </div>
+    </div>
+</div>
+
+<script>
+'use strict';
+/* =========================================================================
+   STATE — single source of truth. Rendering, UI, undo/redo, templates and
+   export all read/write this object instead of scattering DOM lookups.
+   To add a new feature: add a field here, a control in the HTML, one entry
+   in BINDINGS, and (if it draws something) a line in render().
+   ========================================================================= */
+function defaultState() {
+    return {
+        timer: { minutes: 5, seconds: 0, format: 'dynamic', startHold: 0, endHold: 3, stabilizeDigits: true,
+                 endMessage: '', urgencyEnabled: false, urgencyTrigger: 10, urgencyColor: '#ff0044' },
+        clock: { font: "'Montserrat', sans-serif", colorMode: 'solid', solidColor: '#ffffff',
+                 scale: 0.30, opacity: 1.0, x: 50, y: 50 },
+        progress: { type: 'ring', fillBehavior: 'deplete', direction: 'left', cap: 'round', showTrack: true,
+                    segments: 20, thickness: 1.0, scale: 1.0, opacity: 1.0, startAngle: 0, x: 50, y: 50,
+                    colorMode: 'solid', solidColor: '#bb86fc' },
+        border: { type: 'none', colorMode: 'solid', solidColor: '#cccccc', scale: 1.0, opacity: 1.0, x: 50, y: 50 },
+        label: { visible: false, text: '', font: "'Montserrat', sans-serif", color: '#ffffff',
+                 scale: 0.08, opacity: 1.0, x: 50, y: 15 },
+        logo: { visible: false, dataUrl: null, naturalW: 0, naturalH: 0, scale: 0.2, opacity: 1.0, x: 50, y: 88 },
+        theme: { name: 'roseGold' },
+        gradient: { dir: 'horz', count: 3, stops: [
+            { c: '#ff00cc', s: 0 }, { c: '#3333ff', s: 50 }, { c: '#00ffcc', s: 100 }, { c: '#ffffff', s: 75 }, { c: '#000000', s: 100 }
+        ] },
+        output: { bgMode: 'transparent', resolution: '1920,1080', fps: 30 },
+        ui: { showGuides: false }
+    };
+}
+let state = defaultState();
+
+const canvas = document.getElementById('timerCanvas');
+const ctx = canvas.getContext('2d', { alpha: true });
+const statusText = document.getElementById('statusText');
+const startBtn = document.getElementById('startBtn');
+const progressOuter = document.getElementById('progressOuter');
+const progressInner = document.getElementById('progressInner');
+
+let isExporting = false;
+let exportCancelled = false;
+let suppressHandles = false; // true while an export frame is being rendered
+let ffmpegInstance = null;
+let logoImage = null;
+
+/* =========================================================================
+   TABS
+   ========================================================================= */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+});
+
+/* =========================================================================
+   BINDINGS — declarative control <-> state wiring.
+   get(): reads the control's current DOM value into `state`.
+   set(): pushes `state`'s value back into the control (used by undo/redo,
+          template load, and while dragging a handle on the canvas).
+   ========================================================================= */
+const BINDINGS = [
+    ['minutes', s => s.timer.minutes, (s,v) => s.timer.minutes = parseInt(v)||0, 'number'],
+    ['seconds', s => s.timer.seconds, (s,v) => s.timer.seconds = parseInt(v)||0, 'number'],
+    ['format', s => s.timer.format, (s,v) => s.timer.format = v, 'select'],
+    ['startHold', s => s.timer.startHold, (s,v) => s.timer.startHold = parseInt(v)||0, 'number'],
+    ['endHold', s => s.timer.endHold, (s,v) => s.timer.endHold = parseInt(v)||0, 'number'],
+    ['stabilizeDigits', s => s.timer.stabilizeDigits, (s,v) => s.timer.stabilizeDigits = v, 'checkbox'],
+    ['endMessage', s => s.timer.endMessage, (s,v) => s.timer.endMessage = v, 'text'],
+    ['urgencyEnabled', s => s.timer.urgencyEnabled, (s,v) => s.timer.urgencyEnabled = v, 'checkbox'],
+    ['urgencyTrigger', s => s.timer.urgencyTrigger, (s,v) => s.timer.urgencyTrigger = parseFloat(v)||0, 'number'],
+    ['urgencyColor', s => s.timer.urgencyColor, (s,v) => s.timer.urgencyColor = v, 'color'],
+
+    ['clockFont', s => s.clock.font, (s,v) => s.clock.font = v, 'select'],
+    ['clockColorMode', s => s.clock.colorMode, (s,v) => s.clock.colorMode = v, 'select'],
+    ['clockSolidColor', s => s.clock.solidColor, (s,v) => s.clock.solidColor = v, 'color'],
+    ['clockScale', s => s.clock.scale, (s,v) => s.clock.scale = parseFloat(v), 'range'],
+    ['clockOpacity', s => s.clock.opacity, (s,v) => s.clock.opacity = parseFloat(v), 'range'],
+    ['clockX', s => s.clock.x, (s,v) => s.clock.x = parseFloat(v), 'range'],
+    ['clockY', s => s.clock.y, (s,v) => s.clock.y = parseFloat(v), 'range'],
+
+    ['progType', s => s.progress.type, (s,v) => s.progress.type = v, 'select'],
+    ['progFillBehavior', s => s.progress.fillBehavior, (s,v) => s.progress.fillBehavior = v, 'select'],
+    ['progDirection', s => s.progress.direction, (s,v) => s.progress.direction = v, 'select'],
+    ['progCap', s => s.progress.cap, (s,v) => s.progress.cap = v, 'select'],
+    ['progShowTrack', s => s.progress.showTrack, (s,v) => s.progress.showTrack = v, 'checkbox'],
+    ['progSegments', s => s.progress.segments, (s,v) => s.progress.segments = Math.max(2, parseInt(v)||20), 'number'],
+    ['progColorMode', s => s.progress.colorMode, (s,v) => s.progress.colorMode = v, 'select'],
+    ['progSolidColor', s => s.progress.solidColor, (s,v) => s.progress.solidColor = v, 'color'],
+    ['progScale', s => s.progress.scale, (s,v) => s.progress.scale = parseFloat(v), 'range'],
+    ['progThickness', s => s.progress.thickness, (s,v) => s.progress.thickness = parseFloat(v), 'range'],
+    ['progOpacity', s => s.progress.opacity, (s,v) => s.progress.opacity = parseFloat(v), 'range'],
+    ['progStartAngle', s => s.progress.startAngle, (s,v) => s.progress.startAngle = parseFloat(v), 'range'],
+    ['progX', s => s.progress.x, (s,v) => s.progress.x = parseFloat(v), 'range'],
+    ['progY', s => s.progress.y, (s,v) => s.progress.y = parseFloat(v), 'range'],
+
+    ['borderType', s => s.border.type, (s,v) => s.border.type = v, 'select'],
+    ['borderColorMode', s => s.border.colorMode, (s,v) => s.border.colorMode = v, 'select'],
+    ['borderSolidColor', s => s.border.solidColor, (s,v) => s.border.solidColor = v, 'color'],
+    ['borderScale', s => s.border.scale, (s,v) => s.border.scale = parseFloat(v), 'range'],
+    ['borderOpacity', s => s.border.opacity, (s,v) => s.border.opacity = parseFloat(v), 'range'],
+    ['borderX', s => s.border.x, (s,v) => s.border.x = parseFloat(v), 'range'],
+    ['borderY', s => s.border.y, (s,v) => s.border.y = parseFloat(v), 'range'],
+
+    ['labelVisible', s => s.label.visible, (s,v) => s.label.visible = v, 'checkbox'],
+    ['labelText', s => s.label.text, (s,v) => s.label.text = v, 'text'],
+    ['labelFont', s => s.label.font, (s,v) => s.label.font = v, 'select'],
+    ['labelColor', s => s.label.color, (s,v) => s.label.color = v, 'color'],
+    ['labelScale', s => s.label.scale, (s,v) => s.label.scale = parseFloat(v), 'range'],
+    ['labelOpacity', s => s.label.opacity, (s,v) => s.label.opacity = parseFloat(v), 'range'],
+    ['labelX', s => s.label.x, (s,v) => s.label.x = parseFloat(v), 'range'],
+    ['labelY', s => s.label.y, (s,v) => s.label.y = parseFloat(v), 'range'],
+
+    ['logoVisible', s => s.logo.visible, (s,v) => s.logo.visible = v, 'checkbox'],
+    ['logoScale', s => s.logo.scale, (s,v) => s.logo.scale = parseFloat(v), 'range'],
+    ['logoOpacity', s => s.logo.opacity, (s,v) => s.logo.opacity = parseFloat(v), 'range'],
+    ['logoX', s => s.logo.x, (s,v) => s.logo.x = parseFloat(v), 'range'],
+    ['logoY', s => s.logo.y, (s,v) => s.logo.y = parseFloat(v), 'range'],
+
+    ['themeName', s => s.theme.name, (s,v) => s.theme.name = v, 'select'],
+    ['gradCount', s => s.gradient.count, (s,v) => s.gradient.count = parseInt(v), 'select'],
+    ['grad_c0', s => s.gradient.stops[0].c, (s,v) => s.gradient.stops[0].c = v, 'color'],
+    ['grad_s0', s => s.gradient.stops[0].s, (s,v) => s.gradient.stops[0].s = parseInt(v), 'range'],
+    ['grad_c1', s => s.gradient.stops[1].c, (s,v) => s.gradient.stops[1].c = v, 'color'],
+    ['grad_s1', s => s.gradient.stops[1].s, (s,v) => s.gradient.stops[1].s = parseInt(v), 'range'],
+    ['grad_c2', s => s.gradient.stops[2].c, (s,v) => s.gradient.stops[2].c = v, 'color'],
+    ['grad_s2', s => s.gradient.stops[2].s, (s,v) => s.gradient.stops[2].s = parseInt(v), 'range'],
+    ['grad_c3', s => s.gradient.stops[3].c, (s,v) => s.gradient.stops[3].c = v, 'color'],
+    ['grad_s3', s => s.gradient.stops[3].s, (s,v) => s.gradient.stops[3].s = parseInt(v), 'range'],
+    ['grad_c4', s => s.gradient.stops[4].c, (s,v) => s.gradient.stops[4].c = v, 'color'],
+    ['grad_s4', s => s.gradient.stops[4].s, (s,v) => s.gradient.stops[4].s = parseInt(v), 'range'],
+
+    ['bgMode', s => s.output.bgMode, (s,v) => s.output.bgMode = v, 'select'],
+    ['resolution', s => s.output.resolution, (s,v) => s.output.resolution = v, 'select'],
+    ['exportFps', s => s.output.fps, (s,v) => s.output.fps = parseInt(v), 'select'],
+
+    ['showGuides', s => s.ui.showGuides, (s,v) => s.ui.showGuides = v, 'checkbox'],
+];
+const BINDING_MAP = Object.fromEntries(BINDINGS.map(b => [b[0], b]));
+
+function readControl(id) {
+    const el = document.getElementById(id);
+    const [, , set, kind] = BINDING_MAP[id];
+    set(state, kind === 'checkbox' ? el.checked : el.value);
+}
+function writeControl(id) {
+    const el = document.getElementById(id);
+    const [, get, , kind] = BINDING_MAP[id];
+    const v = get(state);
+    if (kind === 'checkbox') el.checked = v; else el.value = v;
+}
+function pushAllToControls() {
+    BINDINGS.forEach(b => writeControl(b[0]));
+    updateSliderReadouts();
+    updateGradRowVisibility();
+    updateColorModeVisibility();
+    updateResolutionCanvas();
+}
+
+// Wire every bound control: 'input' -> live preview only, 'change' -> commit to history.
+BINDINGS.forEach(([id]) => {
+    const el = document.getElementById(id);
+    if (!el) { console.warn('Missing control for binding:', id); return; }
+    el.addEventListener('input', () => { readControl(id); updateSliderReadouts(); onLiveChange(id); renderPreview(); });
+    el.addEventListener('change', () => { readControl(id); onLiveChange(id); renderPreview(); commit(); });
+});
+
+function onLiveChange(id) {
+    if (id === 'gradCount') updateGradRowVisibility();
+    if (id === 'clockColorMode' || id === 'progColorMode' || id === 'borderColorMode') updateColorModeVisibility();
+    if (id === 'resolution') updateResolutionCanvas();
+}
+
+function updateColorModeVisibility() {
+    document.getElementById('clockSolidRow').style.display = state.clock.colorMode === 'solid' ? 'block' : 'none';
+    document.getElementById('progSolidRow').style.display = state.progress.colorMode === 'solid' ? 'block' : 'none';
+    document.getElementById('borderSolidRow').style.display = state.border.colorMode === 'solid' ? 'block' : 'none';
+}
+function updateGradRowVisibility() {
+    for (let i = 0; i < 5; i++) document.getElementById('gradRow' + i).style.display = (i < state.gradient.count) ? 'flex' : 'none';
+}
+function updateResolutionCanvas() {
+    const [w, h] = state.output.resolution.split(',').map(Number);
+    canvas.width = w; canvas.height = h;
+}
+
+/* =========================================================================
+   SLIDER READOUTS
+   ========================================================================= */
+const SLIDER_META = {
+    clockScale: {p:'Size: ',s:'x',d:2}, clockOpacity:{p:'Op: ',s:'',d:2}, clockX:{p:'X: ',s:'%',d:1}, clockY:{p:'Y: ',s:'%',d:1},
+    progScale: {p:'Size: ',s:'x',d:2}, progThickness:{p:'Thick: ',s:'x',d:2}, progOpacity:{p:'Op: ',s:'',d:2},
+    progStartAngle:{p:'Start: ',s:'°',d:0}, progX:{p:'X: ',s:'%',d:1}, progY:{p:'Y: ',s:'%',d:1},
+    borderScale:{p:'Size: ',s:'x',d:2}, borderOpacity:{p:'Op: ',s:'',d:2}, borderX:{p:'X: ',s:'%',d:1}, borderY:{p:'Y: ',s:'%',d:1},
+    labelScale:{p:'Size: ',s:'x',d:3}, labelOpacity:{p:'Op: ',s:'',d:2}, labelX:{p:'X: ',s:'%',d:1}, labelY:{p:'Y: ',s:'%',d:1},
+    logoScale:{p:'Size: ',s:'x',d:2}, logoOpacity:{p:'Op: ',s:'',d:2}, logoX:{p:'X: ',s:'%',d:1}, logoY:{p:'Y: ',s:'%',d:1},
+};
+function updateSliderReadouts() {
+    Object.keys(SLIDER_META).forEach(id => {
+        const el = document.getElementById(id), out = document.getElementById('v_' + id);
+        if (el && out) { const m = SLIDER_META[id]; out.innerText = m.p + parseFloat(el.value).toFixed(m.d) + m.s; }
+    });
+    for (let i = 0; i < 5; i++) {
+        const s = document.getElementById('grad_v' + i);
+        if (s) s.innerText = document.getElementById('grad_s' + i).value + '%';
+    }
+}
+
+/* =========================================================================
+   UNDO / REDO
+   ========================================================================= */
+let history = [snapshot()]; let historyIndex = 0;
+const HISTORY_LIMIT = 60;
+function snapshot() { return JSON.parse(JSON.stringify(state)); }
+function commit() {
+    history = history.slice(0, historyIndex + 1);
+    history.push(snapshot());
+    if (history.length > HISTORY_LIMIT) history.shift();
+    historyIndex = history.length - 1;
+    updateUndoRedoButtons();
+    autosaveDraft();
+}
+function restoreSnapshot(snap) {
+    Object.assign(state, JSON.parse(JSON.stringify(snap)));
+    pushAllToControls();
+    renderPreview();
+    updateUndoRedoButtons();
+}
+function undo() { if (historyIndex > 0) restoreSnapshot(history[--historyIndex]); }
+function redo() { if (historyIndex < history.length - 1) restoreSnapshot(history[++historyIndex]); }
+function updateUndoRedoButtons() {
+    document.getElementById('undoBtn').disabled = historyIndex <= 0;
+    document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+}
+document.getElementById('undoBtn').addEventListener('click', undo);
+document.getElementById('redoBtn').addEventListener('click', redo);
+window.addEventListener('keydown', e => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    if (e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+    else if (e.key.toLowerCase() === 'z' && e.shiftKey) { e.preventDefault(); redo(); }
+    else if (e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
+});
+
+function autosaveDraft() {
+    try { localStorage.setItem('timerDraft', JSON.stringify(state)); } catch (e) {}
+}
+function loadDraft() {
+    try {
+        const s = JSON.parse(localStorage.getItem('timerDraft'));
+        if (s) Object.assign(state, s);
+    } catch (e) {}
+}
+
+/* =========================================================================
+   TIME FORMATTING & TIMELINE
+   ========================================================================= */
+function getFormattedTime(msRemaining, totalMs) {
+    const secRem = Math.max(0, msRemaining / 1000);
+    const format = state.timer.format;
+    if (format === 'dynamic') {
+        if (secRem > 60) { const m = Math.floor(secRem/60), s = Math.floor(secRem%60); return `${m}:${s.toString().padStart(2,'0')}`; }
+        if (secRem > 10) return Math.floor(secRem).toString();
+        return secRem.toFixed(2);
+    }
+    const h = Math.floor(secRem/3600), m = Math.floor((secRem%3600)/60), s = Math.floor(secRem%60);
+    if (format === 'SS.ms') return secRem.toFixed(2);
+    if (format === 'SS') return Math.floor(secRem).toString();
+    const mStr = (format==='MM:SS'||format==='HH:MM:SS') ? m.toString().padStart(2,'0') : m.toString();
+    const sStr = s.toString().padStart(2,'0');
+    return format === 'HH:MM:SS' ? `${h.toString().padStart(2,'0')}:${mStr}:${sStr}` : `${mStr}:${sStr}`;
+}
+function getTimelineParams() {
+    const timerMs = (state.timer.minutes*60 + state.timer.seconds) * 1000;
+    const startHoldMs = state.timer.startHold * 1000;
+    const endHoldMs = state.timer.endHold * 1000;
+    const urgencyMs = state.timer.urgencyTrigger * 1000;
+    return { timerMs, startHoldMs, endHoldMs, urgencyMs, urgencyEnabled: state.timer.urgencyEnabled, totalMs: startHoldMs + timerMs + endHoldMs };
+}
+function computeFrameState(elapsedMs, tl) {
+    if (elapsedMs < tl.startHoldMs) return { text: getFormattedTime(tl.timerMs, tl.timerMs), progressPct: 1.0, isUrgent: false };
+    if (elapsedMs < tl.startHoldMs + tl.timerMs) {
+        const remainingMs = tl.timerMs - (elapsedMs - tl.startHoldMs);
+        return { text: getFormattedTime(remainingMs, tl.timerMs), progressPct: remainingMs / tl.timerMs, isUrgent: tl.urgencyEnabled && remainingMs <= tl.urgencyMs };
+    }
+    return { text: state.timer.endMessage || getFormattedTime(0, tl.timerMs), progressPct: 0, isUrgent: true };
+}
+
+/* =========================================================================
+   COLOR RESOLUTION (shared theme + gradient)
+   ========================================================================= */
+function buildGradient() {
+    const g = state.gradient;
+    const grad = g.dir === 'horz' ? ctx.createLinearGradient(0,0,canvas.width,0)
+               : g.dir === 'vert' ? ctx.createLinearGradient(0,0,0,canvas.height)
+               : ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+    for (let i = 0; i < g.count; i++) grad.addColorStop(g.stops[i].s/100, g.stops[i].c);
+    return grad;
+}
+function getThemeGradient() {
+    const themes = {
+        roseGold: ["#bf953f","#fcf6ba","#aa771c"], gold: ["#FFD700","#FDB931","#DAA520"],
+        silver: ["#E0E0E0","#FFFFFF","#A9A9A9"], ocean: ["#00ffff","#1e90ff","#00008b"],
+        fire: ["#ff0000","#ff7f00","#ffff00"], neon: ["#ff00cc","#3333ff","#00ffcc"],
+        candy: ["#ff9a9e","#fad0c4","#ffd1ff"]
+    };
+    const colors = themes[state.theme.name] || ["#ffffff"];
+    const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+    colors.forEach((c,i) => grad.addColorStop(i/(colors.length-1||1), c));
+    return grad;
+}
+// mode/solidColor as configured on the element; 'matchText' substitutes the clock's own mode+color.
+function resolveFillColor(mode, solidColor, isUrgent) {
+    if (isUrgent) return state.timer.urgencyColor;
+    if (mode === 'matchText') return resolveFillColor(state.clock.colorMode, state.clock.solidColor, false);
+    if (mode === 'theme') return getThemeGradient();
+    if (mode === 'customGrad') return buildGradient();
+    return solidColor;
+}
+
+/* =========================================================================
+   RENDER — pure function of `state` (+ the current frame's text/progress/urgency)
+   ========================================================================= */
+function drawAnchoredText(text, cx, cy) {
+    const charWidth = ctx.measureText("0").width;
+    let totalWidth = 0;
+    for (const c of text) totalWidth += (c===':'||c==='.') ? charWidth*0.4 : charWidth;
+    let x = cx - totalWidth/2;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    for (const c of text) {
+        const cw = (c===':'||c==='.') ? charWidth*0.4 : charWidth;
+        ctx.fillText(c, x+cw/2, cy); ctx.strokeText(c, x+cw/2, cy);
+        x += cw;
+    }
+}
+
+function drawClock(text, isUrgent) {
+    const c = state.clock;
+    const fSize = Math.floor(Math.min(canvas.width, canvas.height) * c.scale);
+    ctx.font = `${fSize}px ${c.font}`;
+    const cx = canvas.width * c.x/100, cy = canvas.height * c.y/100;
+    ctx.globalAlpha = c.opacity;
+    ctx.fillStyle = resolveFillColor(c.colorMode, c.solidColor, isUrgent);
+    ctx.lineWidth = Math.max(2, fSize*0.015);
+    const transparent = state.output.bgMode === 'transparent';
+    ctx.strokeStyle = transparent ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.2)";
+    ctx.shadowColor = transparent ? (isUrgent ? state.timer.urgencyColor : "rgba(0,0,0,0.6)") : "transparent";
+    ctx.shadowBlur = transparent ? 15 : 0;
+    if (state.timer.stabilizeDigits) drawAnchoredText(text, cx, cy);
+    else { ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(text,cx,cy); ctx.strokeText(text,cx,cy); }
+    ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
+}
+
+function drawProgress(progressPct, isUrgent) {
+    const p = state.progress;
+    if (p.type === 'none') return;
+    ctx.globalAlpha = p.opacity;
+    const px = canvas.width * p.x/100, py = canvas.height * p.y/100;
+    const activePct = p.fillBehavior === 'fill' ? (1.0 - progressPct) : progressPct;
+    const refDim = Math.min(canvas.width, canvas.height);
+    const isCCW = p.direction === 'right';
+    const fillColor = resolveFillColor(p.colorMode, p.solidColor, isUrgent);
+    ctx.strokeStyle = fillColor; ctx.fillStyle = fillColor;
+    ctx.lineCap = p.cap;
+    ctx.lineWidth = Math.max(2, refDim * 0.02 * p.thickness);
+    const startAngle = -Math.PI/2 + (p.startAngle * Math.PI/180);
+
+    const roundRectPath = (x,y,w,h,r) => {
+        r = Math.max(0, Math.min(r, Math.abs(w)/2, Math.abs(h)/2));
+        ctx.beginPath(); ctx.moveTo(x+r,y);
+        ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+        ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+    };
+
+    if (p.type.startsWith('ring')) {
+        const r = refDim * 0.4 * p.scale;
+        if (p.showTrack) {
+            ctx.globalAlpha = p.opacity * 0.2; ctx.strokeStyle = "#ffffff";
+            ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.stroke();
+            ctx.globalAlpha = p.opacity; ctx.strokeStyle = fillColor;
+        }
+        if (p.type === 'ring_segmented') {
+            const gapFrac = 0.35, segAngle = (Math.PI*2)/p.segments, lit = Math.round(activePct*p.segments);
+            for (let i=0;i<p.segments;i++) {
+                const a0 = startAngle + (isCCW?-1:1)*i*segAngle;
+                const a1 = a0 + (isCCW?-1:1)*segAngle*(1-gapFrac);
+                ctx.globalAlpha = (i<lit) ? p.opacity : p.opacity*0.15;
+                ctx.beginPath(); ctx.arc(px,py,r,a0,a1,isCCW); ctx.stroke();
+            }
+            ctx.globalAlpha = p.opacity;
+        } else {
+            const endA = startAngle + (Math.PI*2*activePct)*(isCCW?-1:1);
+            if (p.type === 'ring_dashed') { const d = (Math.PI*2*r)/(p.segments*2); ctx.setLineDash([d,d]); }
+            ctx.beginPath(); ctx.arc(px,py,r,startAngle,endA,isCCW); ctx.stroke();
+            ctx.setLineDash([]);
+        }
+    } else if (p.type === 'ring_sector') {
+        const r = refDim * 0.42 * p.scale;
+        if (p.showTrack) { ctx.globalAlpha = p.opacity*0.12; ctx.fillStyle="#ffffff"; ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.fill(); }
+        ctx.globalAlpha = p.opacity*0.35; ctx.fillStyle = fillColor;
+        ctx.beginPath(); ctx.moveTo(px,py);
+        ctx.arc(px,py,r,startAngle,startAngle+(Math.PI*2*activePct)*(isCCW?-1:1),isCCW);
+        ctx.lineTo(px,py); ctx.fill();
+        ctx.globalAlpha = p.opacity;
+    } else if (p.type === 'frame_square') {
+        const fw = canvas.width*0.6*p.scale, fh = refDim*0.4*p.scale;
+        const fx = px-fw/2, fy = py-fh/2;
+        if (p.showTrack) { ctx.globalAlpha = p.opacity*0.2; ctx.strokeRect(fx,fy,fw,fh); ctx.globalAlpha = p.opacity; }
+        const topMid = {x:px,y:fy};
+        const pts = [topMid,{x:fx+fw,y:fy},{x:fx+fw,y:fy+fh},{x:fx,y:fy+fh},{x:fx,y:fy},topMid];
+        const segs = []; let total = 0;
+        for (let i=0;i<pts.length-1;i++){ const len=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y); segs.push({from:pts[i],to:pts[i+1],len}); total+=len; }
+        const pointAtDist = d => { d=((d%total)+total)%total; for (const seg of segs){ if(d<=seg.len){const t=seg.len===0?0:d/seg.len; return {x:seg.from.x+(seg.to.x-seg.from.x)*t, y:seg.from.y+(seg.to.y-seg.from.y)*t};} d-=seg.len; } return pts[0]; };
+        const startOffset = (p.startAngle/360)*total*(isCCW?-1:1);
+        const drawLen = total*activePct, steps=80;
+        ctx.beginPath();
+        for (let i=0;i<=steps;i++){ const d=startOffset+(isCCW?-1:1)*(drawLen*i/steps); const pt=pointAtDist(d); if(i===0) ctx.moveTo(pt.x,pt.y); else ctx.lineTo(pt.x,pt.y); }
+        ctx.stroke();
+    } else if (p.type.startsWith('bar')) {
+        const isVert = p.type === 'bar_vert', isSeg = p.type === 'bar_segmented';
+        const barLen = (isVert?canvas.height:canvas.width)*0.7*p.scale;
+        const barThick = refDim*0.05*p.thickness;
+        const cxStart = isVert ? px-barThick/2 : px-barLen/2;
+        const cyStart = isVert ? py-barLen/2 : py-barThick/2;
+        const fullW = isVert?barThick:barLen, fullH = isVert?barLen:barThick;
+        if (p.showTrack) {
+            ctx.globalAlpha = p.opacity*0.2; ctx.fillStyle="#ffffff";
+            if (p.cap==='round') { roundRectPath(cxStart,cyStart,fullW,fullH,Math.min(fullW,fullH)/2); ctx.fill(); }
+            else ctx.fillRect(cxStart,cyStart,fullW,fullH);
+            ctx.globalAlpha = p.opacity;
+        }
+        ctx.fillStyle = fillColor;
+        if (isSeg) {
+            const segLenTotal = barLen/p.segments, gap = segLenTotal*0.25, segLen = segLenTotal-gap;
+            const lit = Math.round(activePct*p.segments);
+            for (let i=0;i<p.segments;i++) {
+                const idxFromEnd = p.segments-1-i;
+                const on = p.direction==='right' ? idxFromEnd<lit : p.direction==='center' ? Math.abs(i-(p.segments-1)/2)<=(lit/2-0.5) : i<lit;
+                ctx.globalAlpha = on ? p.opacity : p.opacity*0.15;
+                const off = i*segLenTotal;
+                if (isVert) { const y=cyStart+off; if(p.cap==='round'){roundRectPath(cxStart,y,fullW,segLen,fullW/2);ctx.fill();} else ctx.fillRect(cxStart,y,fullW,segLen); }
+                else { const x=cxStart+off; if(p.cap==='round'){roundRectPath(x,cyStart,segLen,fullH,fullH/2);ctx.fill();} else ctx.fillRect(x,cyStart,segLen,fullH); }
+            }
+            ctx.globalAlpha = p.opacity;
+        } else {
+            const activeLen = barLen*activePct;
+            let x=cxStart,y=cyStart,w=fullW,h=fullH;
+            if (isVert) { h=activeLen; if(p.direction==='center') y=py-activeLen/2; else if(p.direction==='right') y=cyStart+(barLen-activeLen); }
+            else { w=activeLen; if(p.direction==='center') x=px-activeLen/2; else if(p.direction==='right') x=cxStart+(barLen-activeLen); }
+            if (p.cap==='round') { roundRectPath(x,y,w,h,Math.min(fullW,fullH)/2); ctx.fill(); } else ctx.fillRect(x,y,w,h);
+        }
+    }
+    ctx.setLineDash([]); ctx.lineCap = 'round';
+}
+
+function drawBorder(isUrgent) {
+    const b = state.border;
+    if (b.type === 'none') return;
+    ctx.globalAlpha = b.opacity;
+    const bxC = canvas.width*b.x/100, byC = canvas.height*b.y/100;
+    const refDim = Math.min(canvas.width, canvas.height);
+    const bw = canvas.width*0.6*b.scale, bh = refDim*0.4*b.scale;
+    const bx = bxC-bw/2, by = byC-bh/2;
+    ctx.strokeStyle = resolveFillColor(b.colorMode, b.solidColor, isUrgent);
+    ctx.lineWidth = Math.max(2, refDim*0.01*b.scale);
+    ctx.lineCap = 'round';
+    if (b.type==='box') ctx.strokeRect(bx,by,bw,bh);
+    else if (b.type==='underline') { ctx.beginPath(); ctx.moveTo(bx,by+bh); ctx.lineTo(bx+bw,by+bh); ctx.stroke(); }
+    else if (b.type==='circle') { ctx.beginPath(); ctx.arc(bxC,byC,refDim*0.4*b.scale,0,Math.PI*2); ctx.stroke(); }
+    else if (b.type==='brackets') {
+        const wing = refDim*0.05*b.scale;
+        ctx.beginPath();
+        ctx.moveTo(bx+wing,by); ctx.lineTo(bx,by); ctx.lineTo(bx,by+bh); ctx.lineTo(bx+wing,by+bh);
+        ctx.moveTo(bx+bw-wing,by); ctx.lineTo(bx+bw,by); ctx.lineTo(bx+bw,by+bh); ctx.lineTo(bx+bw-wing,by+bh);
+        ctx.stroke();
+    }
+}
+
+function drawLabel() {
+    const l = state.label;
+    if (!l.visible || !l.text) return;
+    ctx.globalAlpha = l.opacity;
+    const fSize = Math.floor(Math.min(canvas.width, canvas.height) * l.scale);
+    ctx.font = `${fSize}px ${l.font}`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = l.color;
+    ctx.fillText(l.text, canvas.width*l.x/100, canvas.height*l.y/100);
+}
+
+function drawLogo() {
+    const g = state.logo;
+    if (!g.visible || !logoImage) return;
+    ctx.globalAlpha = g.opacity;
+    const targetW = canvas.width * g.scale;
+    const aspect = g.naturalW ? (g.naturalH/g.naturalW) : 1;
+    const targetH = targetW * aspect;
+    ctx.drawImage(logoImage, canvas.width*g.x/100-targetW/2, canvas.height*g.y/100-targetH/2, targetW, targetH);
+}
+
+const DRAGGABLE = [
+    { key:'clock', color:'#ff0044', label:'Clock', active:() => true, get:() => [state.clock.x,state.clock.y], set:(x,y)=>{state.clock.x=x;state.clock.y=y;} },
+    { key:'progress', color:'#00ffcc', label:'Progress', active:() => state.progress.type!=='none', get:()=>[state.progress.x,state.progress.y], set:(x,y)=>{state.progress.x=x;state.progress.y=y;} },
+    { key:'border', color:'#bb86fc', label:'Border', active:() => state.border.type!=='none', get:()=>[state.border.x,state.border.y], set:(x,y)=>{state.border.x=x;state.border.y=y;} },
+    { key:'label', color:'#ffd700', label:'Label', active:() => state.label.visible, get:()=>[state.label.x,state.label.y], set:(x,y)=>{state.label.x=x;state.label.y=y;} },
+    { key:'logo', color:'#66ff66', label:'Logo', active:() => state.logo.visible, get:()=>[state.logo.x,state.logo.y], set:(x,y)=>{state.logo.x=x;state.logo.y=y;} },
+];
+
+function drawHandlesAndGuides() {
+    if (suppressHandles) return;
+    ctx.globalAlpha = 1.0; ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.setLineDash([]);
+
+    if (state.ui.showGuides) {
+        ctx.strokeStyle = "rgba(0,255,255,0.5)"; ctx.lineWidth = 2; ctx.setLineDash([10,10]);
+        ctx.beginPath(); ctx.moveTo(canvas.width/2,0); ctx.lineTo(canvas.width/2,canvas.height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,canvas.height/2); ctx.lineTo(canvas.width,canvas.height/2); ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    const r = Math.min(canvas.width, canvas.height) * 0.012;
+    DRAGGABLE.forEach(d => {
+        if (!d.active()) return;
+        const [xPct,yPct] = d.get();
+        const x = canvas.width*xPct/100, y = canvas.height*yPct/100;
+        ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+        ctx.fillStyle = d.color; ctx.globalAlpha = 0.85; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.globalAlpha = 0.6; ctx.stroke();
+        if (state.ui.showGuides) {
+            ctx.globalAlpha = 1; ctx.fillStyle = '#fff'; ctx.font = `${Math.round(r*1.1)}px Arial`; ctx.textAlign='left'; ctx.textBaseline='middle';
+            ctx.fillText(d.label, x + r*1.6, y);
+        }
+    });
+    ctx.globalAlpha = 1.0;
+}
+
+function render(text, progressPct, isUrgent) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if (state.output.bgMode !== 'transparent') {
+        ctx.globalAlpha = 1.0;
+        ctx.fillStyle = state.output.bgMode==='green' ? '#00FF00' : state.output.bgMode==='white' ? '#FFFFFF' : '#000000';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
+    drawProgress(progressPct, isUrgent);
+    drawBorder(isUrgent);
+    drawClock(text, isUrgent);
+    drawLabel();
+    drawLogo();
+    drawHandlesAndGuides();
+}
+
+function renderPreview() {
+    const totalMs = (state.timer.minutes*60 + state.timer.seconds) * 1000;
+    render(getFormattedTime(totalMs, totalMs), 1.0, false);
+    updateExportEstimate();
+}
+
+/* =========================================================================
+   ON-CANVAS DRAG-TO-POSITION
+   ========================================================================= */
+let dragTarget = null;
+// Accepts both MouseEvent and TouchEvent so dragging works with a finger on a phone/tablet too.
+function eventPoint(evt) {
+    if (evt.touches && evt.touches.length) return evt.touches[0];
+    if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0];
+    return evt;
+}
+function canvasPos(evt) {
+    const { clientX, clientY } = eventPoint(evt);
+    const rect = canvas.getBoundingClientRect();
+    return { x: (clientX-rect.left) * (canvas.width/rect.width), y: (clientY-rect.top) * (canvas.height/rect.height) };
+}
+function dragStart(e) {
+    if (isExporting) return;
+    const pos = canvasPos(e);
+    const threshold = Math.min(canvas.width, canvas.height) * 0.06;
+    let best = null, bestDist = Infinity;
+    DRAGGABLE.forEach(d => {
+        if (!d.active()) return;
+        const [xPct,yPct] = d.get();
+        const dist = Math.hypot(pos.x - canvas.width*xPct/100, pos.y - canvas.height*yPct/100);
+        if (dist < threshold && dist < bestDist) { best = d; bestDist = dist; }
+    });
+    if (best) { dragTarget = best; canvas.style.cursor = 'grabbing'; e.preventDefault(); }
+}
+function dragMove(e) {
+    if (!dragTarget) return;
+    e.preventDefault(); // stop page scroll while actively dragging a handle
+    const pos = canvasPos(e);
+    const xPct = Math.max(0, Math.min(100, pos.x/canvas.width*100));
+    const yPct = Math.max(0, Math.min(100, pos.y/canvas.height*100));
+    dragTarget.set(xPct, yPct);
+    pushAllToControls();
+    renderPreview();
+}
+function dragEnd() {
+    if (dragTarget) { dragTarget = null; canvas.style.cursor = 'default'; commit(); }
+}
+canvas.addEventListener('mousedown', dragStart);
+window.addEventListener('mousemove', dragMove);
+window.addEventListener('mouseup', dragEnd);
+canvas.addEventListener('touchstart', dragStart, { passive: false });
+window.addEventListener('touchmove', dragMove, { passive: false });
+window.addEventListener('touchend', dragEnd);
+window.addEventListener('touchcancel', dragEnd);
+
+/* =========================================================================
+   GRADIENT BUILDER EXTRA CONTROLS (direction / reverse — not simple 1:1 bindings)
+   ========================================================================= */
+document.querySelectorAll('[data-dir]').forEach(btn => {
+    btn.addEventListener('click', () => { state.gradient.dir = btn.dataset.dir; renderPreview(); commit(); });
+});
+document.getElementById('gradReverseBtn').addEventListener('click', () => {
+    const g = state.gradient;
+    const active = g.stops.slice(0, g.count);
+    const reversed = active.slice().reverse().map((st,i) => ({ c: st.c, s: 100 - active[active.length-1-i].s }));
+    // simpler & correct: reverse colors, and mirror stop positions
+    const colors = active.map(s=>s.c).reverse();
+    const stops = active.map(s=>100-s.s).reverse();
+    for (let i=0;i<g.count;i++){ g.stops[i].c = colors[i]; g.stops[i].s = stops[i]; }
+    pushAllToControls(); renderPreview(); commit();
+});
+
+/* =========================================================================
+   EXPORT ESTIMATE
+   ========================================================================= */
+function updateExportEstimate() {
+    const tl = getTimelineParams();
+    const fps = state.output.fps;
+    const totalFrames = Math.max(1, Math.ceil(tl.totalMs/1000*fps));
+    const seconds = tl.totalMs/1000;
+    const mm = Math.floor(seconds/60), ss = Math.round(seconds%60);
+    const container = state.output.bgMode === 'transparent' ? 'ProRes 4444 MOV (real alpha)' : `MP4 (baked ${state.output.bgMode} background)`;
+    document.getElementById('exportEstimate').innerText =
+        `Output: ${container} · ${mm}m ${ss}s @ ${fps}fps · ${totalFrames.toLocaleString()} frames rendered — fully automatic, no screen recording, no separate encoder step.`;
+    return { totalFrames, fps, tl };
+}
+
+/* =========================================================================
+   FONT & LOGO UPLOADS
+   ========================================================================= */
+document.getElementById('clockFontFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    try {
+        const url = URL.createObjectURL(file);
+        const font = new FontFace('CustomUploadedFont', `url(${url})`);
+        await font.load();
+        document.fonts.add(font);
+        state.clock.font = "'CustomUploadedFont', sans-serif";
+        document.getElementById('clockFont').value = state.clock.font;
+        renderPreview(); commit();
+        alert("Custom font '" + file.name + "' loaded!");
+    } catch (err) { console.error(err); alert("Failed to load font — must be TTF, OTF, WOFF or WOFF2."); }
+});
+
+document.getElementById('logoFile').addEventListener('change', (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+            logoImage = img;
+            state.logo.dataUrl = reader.result;
+            state.logo.naturalW = img.naturalWidth;
+            state.logo.naturalH = img.naturalHeight;
+            state.logo.visible = true;
+            document.getElementById('logoVisible').checked = true;
+            renderPreview(); commit();
+        };
+        img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+document.getElementById('testAudioBtn').addEventListener('click', async () => {
+    const file = document.getElementById('audioFile').files[0];
+    if (!file) return alert("Select an audio file first.");
+    const actx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = actx.createBufferSource();
+    src.buffer = await actx.decodeAudioData(await file.arrayBuffer());
+    src.connect(actx.destination); src.start(0);
+    setTimeout(() => src.stop(), 5000);
+});
+
+/* =========================================================================
+   FFMPEG EXPORT (lazy-loaded, fast non-realtime frame export)
+   Transparent -> ProRes 4444 MOV (real alpha, imports natively into Premiere)
+   Baked green/black/white -> MP4 (H.264)
+   ========================================================================= */
+async function getFfmpeg() {
+    if (ffmpegInstance) return ffmpegInstance;
+    statusText.innerText = "Loading video encoder (first run only, ~30MB)...";
+    const { FFmpeg } = await import('./vendor/ffmpeg/index.js');
+    const { toBlobURL } = await import('./vendor/util/index.js');
+    const ffmpeg = new FFmpeg();
+    ffmpeg.on('log', ({ message }) => console.log('[ffmpeg]', message));
+    const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm';
+    await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    });
+    ffmpegInstance = ffmpeg;
+    return ffmpeg;
+}
+
+function setProgress(pct) { progressOuter.style.display='block'; progressInner.style.width = Math.max(0,Math.min(100,pct))+'%'; }
+
+function toggleExport() { isExporting ? cancelExport() : exportVideo(); }
+function cancelExport() { exportCancelled = true; statusText.innerText = "Cancelling after current frame..."; }
+
+async function exportVideo() {
+    const { totalFrames, fps, tl } = updateExportEstimate();
+    if (totalFrames > 4000) {
+        const proceed = confirm(`This will render ${totalFrames.toLocaleString()} frames, which can take a while and a lot of memory (especially at 4K). For long timers, consider a lower frame rate (24fps) or 1080p.\n\nContinue anyway?`);
+        if (!proceed) return;
+    }
+    isExporting = true; exportCancelled = false; suppressHandles = true;
+    startBtn.innerHTML = "⏹️ Cancel Export"; startBtn.classList.add("stop-btn");
+    setProgress(0);
+
+    try {
+        const ffmpeg = await getFfmpeg();
+        if (exportCancelled) throw new Error('cancelled');
+
+        statusText.innerText = `Rendering frame 0 / ${totalFrames}...`;
+        const digits = Math.max(6, String(totalFrames).length);
+        for (let i = 0; i < totalFrames; i++) {
+            if (exportCancelled) throw new Error('cancelled');
+            const st = computeFrameState((i*1000)/fps, tl);
+            render(st.text, st.progressPct, st.isUrgent);
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+            const buf = new Uint8Array(await blob.arrayBuffer());
+            await ffmpeg.writeFile(`frame${String(i).padStart(digits,'0')}.png`, buf);
+            if (i % 5 === 0 || i === totalFrames-1) {
+                statusText.innerText = `Rendering frame ${i+1} / ${totalFrames}...`;
+                setProgress((i/totalFrames)*70);
+                await new Promise(r => setTimeout(r, 0));
+            }
+        }
+
+        const isTransparent = state.output.bgMode === 'transparent';
+        const outName = isTransparent ? 'output.mov' : 'output.mp4';
+        const audioFileInput = document.getElementById('audioFile').files[0];
+        let audioName = null;
+        if (audioFileInput) {
+            audioName = 'audio' + (audioFileInput.name.match(/\.[^.]+$/)?.[0] || '.mp3');
+            await ffmpeg.writeFile(audioName, new Uint8Array(await audioFileInput.arrayBuffer()));
+        }
+
+        statusText.innerText = isTransparent ? "Encoding video... (ProRes 4444 is slower than H.264 — this may take a bit)" : "Encoding video...";
+        setProgress(75);
+
+        const args = ['-framerate', String(fps), '-start_number', '0', '-i', `frame%0${digits}d.png`];
+        if (audioName) args.push('-i', audioName);
+        if (isTransparent) args.push('-c:v','prores_ks','-profile:v','4444','-pix_fmt','yuva444p10le','-alpha_bits','8','-qscale:v','9');
+        else args.push('-c:v','libx264','-pix_fmt','yuv420p','-crf','18','-preset','veryfast');
+        if (audioName) args.push('-c:a','aac','-b:a','192k','-shortest');
+        args.push(outName);
+
+        await ffmpeg.exec(args);
+        setProgress(95);
+
+        const data = await ffmpeg.readFile(outName);
+        const mime = isTransparent ? 'video/quicktime' : 'video/mp4';
+        const url = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
+        const a = document.createElement('a');
+        a.href = url; a.download = isTransparent ? 'timer_output.mov' : 'timer_output.mp4';
+        a.click(); URL.revokeObjectURL(url);
+
+        for (let i = 0; i < totalFrames; i++) { try { await ffmpeg.deleteFile(`frame${String(i).padStart(digits,'0')}.png`); } catch(e){} }
+        try { await ffmpeg.deleteFile(outName); } catch(e){}
+        if (audioName) try { await ffmpeg.deleteFile(audioName); } catch(e){}
+
+        setProgress(100);
+        statusText.innerText = `Done! Downloaded timer_output.${isTransparent?'mov':'mp4'}`;
+    } catch (err) {
+        if (err && err.message === 'cancelled') statusText.innerText = "Export cancelled.";
+        else {
+            console.error(err);
+            statusText.innerText = "Export failed — see console (F12) for details.";
+            if (ffmpegInstance) { try { ffmpegInstance.terminate(); } catch(e){} ffmpegInstance = null; }
+        }
+    } finally {
+        isExporting = false; suppressHandles = false;
+        startBtn.innerHTML = "📤 Export Video"; startBtn.classList.remove("stop-btn");
+        setTimeout(() => { progressOuter.style.display = 'none'; }, 1500);
+        renderPreview();
+    }
+}
+startBtn.addEventListener('click', toggleExport);
+
+/* =========================================================================
+   NAMED TEMPLATES (full-state presets)
+   ========================================================================= */
+function getTemplates() { return JSON.parse(localStorage.getItem('timerTemplates') || '{}'); }
+function populateTemplateSelect() {
+    const sel = document.getElementById('templateSelect');
+    const names = Object.keys(getTemplates()).sort();
+    const prev = sel.value;
+    sel.innerHTML = names.length ? names.map(n => `<option value="${n}">${n}</option>`).join('') : '<option value="">No saved templates</option>';
+    if (names.includes(prev)) sel.value = prev;
+}
+document.getElementById('templateSaveBtn').addEventListener('click', () => {
+    const name = prompt("Save current timer as template named:");
+    if (!name) return;
+    const templates = getTemplates();
+    templates[name] = snapshot();
+    localStorage.setItem('timerTemplates', JSON.stringify(templates));
+    populateTemplateSelect();
+    document.getElementById('templateSelect').value = name;
+});
+document.getElementById('templateLoadBtn').addEventListener('click', () => {
+    const name = document.getElementById('templateSelect').value;
+    const templates = getTemplates();
+    if (!name || !templates[name]) return alert("Select a saved template first.");
+    Object.assign(state, templates[name]);
+    pushAllToControls(); renderPreview(); commit();
+});
+document.getElementById('templateDeleteBtn').addEventListener('click', () => {
+    const name = document.getElementById('templateSelect').value;
+    const templates = getTemplates();
+    if (!name || !templates[name]) return alert("Select a saved template first.");
+    if (!confirm(`Delete template "${name}"?`)) return;
+    delete templates[name];
+    localStorage.setItem('timerTemplates', JSON.stringify(templates));
+    populateTemplateSelect();
+});
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+document.fonts.ready.then(() => {
+    loadDraft();
+    pushAllToControls();
+    if (state.logo.dataUrl) {
+        const img = new Image();
+        img.onload = () => { logoImage = img; renderPreview(); };
+        img.src = state.logo.dataUrl;
+    }
+    renderPreview();
+    populateTemplateSelect();
+    updateUndoRedoButtons();
+    history = [snapshot()]; historyIndex = 0;
+});
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW registration failed:', err));
+    });
+}
+</script>
+</body>
+</html>
