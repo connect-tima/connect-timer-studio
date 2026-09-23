@@ -181,6 +181,7 @@
                         <option value="ring_segmented">Segmented Ring (Dial)</option>
                         <option value="ring_sector">Pie Chart</option>
                         <option value="frame_square">Square Frame Chase</option>
+                        <option value="waveform">Sound Waveform</option>
                     </select>
                     <select id="progFillBehavior">
                         <option value="deplete">Deplete (Full→Empty)</option>
@@ -223,7 +224,7 @@
                     <div class="col"><span class="sval" id="v_progX">X</span><input type="range" id="progX" min="0" max="100" step="0.5"></div>
                     <div class="col"><span class="sval" id="v_progY">Y</span><input type="range" id="progY" min="0" max="100" step="0.5"></div>
                 </div>
-                <div class="hint">Tip: drag the teal handle directly on the preview to reposition.</div>
+                <div class="hint">Tip: drag the teal handle directly on the preview to reposition. For Sound Waveform's classic playhead look (fills left→right as time counts down), set Fill Behavior to "Fill (Empty→Full)".</div>
             </div>
         </div>
 
@@ -776,6 +777,24 @@ function drawClock(text, isUrgent) {
     ctx.shadowColor = "transparent"; ctx.shadowBlur = 0;
 }
 
+// Deterministic bar-height envelope for the waveform shape — cached per bar count so it doesn't
+// re-randomize (and visibly flicker) on every render call, only when Segments actually changes.
+let waveformCache = { n: null, heights: null };
+function getWaveformHeights(n) {
+    if (waveformCache.n === n && waveformCache.heights) return waveformCache.heights;
+    const seeded = (i) => { const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); };
+    const heights = [];
+    for (let i = 0; i < n; i++) {
+        const t = i / (Math.max(1, n - 1));
+        const envelope = Math.sin(Math.PI * t); // tapers toward 0 at both ends, like a real audio clip
+        const wave = 0.5 + 0.5 * Math.sin(t * Math.PI * 8) * Math.sin(t * Math.PI * 2.7);
+        const jitter = seeded(i) * 0.35;
+        heights.push(Math.max(0.08, Math.min(1, envelope * (0.35 + 0.65 * wave) + jitter * envelope)));
+    }
+    waveformCache = { n, heights };
+    return heights;
+}
+
 function drawProgress(progressPct, isUrgent) {
     const p = state.progress;
     if (p.type === 'none') return;
@@ -841,6 +860,28 @@ function drawProgress(progressPct, isUrgent) {
         ctx.beginPath();
         for (let i=0;i<=steps;i++){ const d=startOffset+(isCCW?-1:1)*(drawLen*i/steps); const pt=pointAtDist(d); if(i===0) ctx.moveTo(pt.x,pt.y); else ctx.lineTo(pt.x,pt.y); }
         ctx.stroke();
+    } else if (p.type === 'waveform') {
+        const barLen = canvas.width * 0.7 * p.scale;
+        const maxBarH = refDim * 0.16 * p.thickness;
+        const n = p.segments;
+        const heights = getWaveformHeights(n);
+        const cxStart = px - barLen/2;
+        const segLenTotal = barLen/n;
+        const barW = segLenTotal * 0.65;
+        const litCount = activePct * n;
+        for (let i = 0; i < n; i++) {
+            const idxFromEnd = n-1-i;
+            const isPlayed = p.direction === 'right' ? idxFromEnd < litCount
+                           : p.direction === 'center' ? Math.abs(i-(n-1)/2) <= (litCount/2)
+                           : i < litCount;
+            ctx.globalAlpha = isPlayed ? p.opacity : p.opacity * 0.25;
+            const h = Math.max(4, heights[i] * maxBarH);
+            const x = cxStart + i*segLenTotal;
+            const y = py - h/2;
+            if (p.cap === 'round') { roundRectPath(x, y, barW, h, barW/2); ctx.fill(); }
+            else ctx.fillRect(x, y, barW, h);
+        }
+        ctx.globalAlpha = p.opacity;
     } else if (p.type.startsWith('bar')) {
         const isVert = p.type === 'bar_vert', isSeg = p.type === 'bar_segmented';
         const barLen = (isVert?canvas.height:canvas.width)*0.7*p.scale;
